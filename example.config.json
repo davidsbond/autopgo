@@ -1,0 +1,12 @@
+{
+  "apiUrl": "http://localhost:8080",
+  "sampleSize": 10,
+  "profileDuration": 30,
+  "scrapeFrequency": 30,
+  "targets": [
+    {
+      "app": "test",
+      "address": "http://localhost:8081/debug/pprof/profile"
+    }
+  ]
+}
