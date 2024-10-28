@@ -41,21 +41,21 @@ sampling behaviour and the targets available to be scraped. Below is an example 
 
 ```json5
 {
-  "apiUrl": "http://localhost:8080",
   // Base URL to the profile server, where scraped profiles are forwarded.
-  "sampleSize": 3,
+  "apiUrl": "http://localhost:8080",
   // The maximum number of targets to sample at once.
-  "profileDuration": 30,
+  "sampleSize": 3,
   // How long targets should be profiled for, in seconds.
-  "scrapeFrequency": 300,
+  "profileDuration": 30,
   // How frequently targets should be profiled, in seconds.
+  "scrapeFrequency": 300,
+  // Endpoints that will profile applications.
   "targets": [
-    // Endpoints that will profile applications.
     {
-      "app": "example-app",
       // The application the profile will belong to.
-      "address": "http://localhost:5000/debug/pprof/profile"
+      "app": "example-app",
       // The full address pointing to the target's profiling endpoint.
+      "address": "http://localhost:5000/debug/pprof/profile"
     }
   ]
 }
@@ -139,14 +139,14 @@ Every event is wrapped with an envelope containing metadata about the event and 
 
 ```json5
 {
-  "id": "e9e23fa8-9d46-4c66-9190-2f64eacd73a2",
   // A UUID unique to the event.
-  "timestamp": "2024-10-28T12:16:34.964Z",
+  "id": "e9e23fa8-9d46-4c66-9190-2f64eacd73a2",
   // When the event was published.
-  "type": "profile.merged",
+  "timestamp": "2024-10-28T12:16:34.964Z",
   // The type of event, denotes the payload structure.
-  "payload": {}
+  "type": "profile.merged",
   // The payload contents.
+  "payload": {}
 }
 ```
 
@@ -160,10 +160,10 @@ Event that indicates a new profile has been uploaded and is staged for merging.
 
 ```json5
 {
-  "app": "example-app",
   // The name of the application the profile is for.
-  "profileKey": "example-app/staging/1730075435311"
+  "app": "example-app",
   // The location of the profile in blob storage.
+  "profileKey": "example-app/staging/1730075435311"
 }
 ```
 
@@ -173,12 +173,12 @@ Event that indicates an uploaded profile has been merged with the base profile a
 
 ```json5
 {
-  "app": "example-app",
   // The name of the application the profile is for.
-  "profileKey": "example-app/staging/1730075435311",
+  "app": "example-app",
   // The location of the profile in blob storage.
-  "mergedKey": "example-app/default.pgo"
+  "profileKey": "example-app/staging/1730075435311",
   // The location of the base profile.
+  "mergedKey": "example-app/default.pgo"
 }
 ```
 
