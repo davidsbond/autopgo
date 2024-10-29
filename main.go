@@ -85,7 +85,7 @@ func main() {
 	)
 
 	flags := cmd.PersistentFlags()
-	flags.StringVar(&logLevel, "log-level", "info", "Sets the minimum log level (debug, info, warn or error)")
+	flags.StringVarP(&logLevel, "log-level", "l", "info", "Sets the minimum log level (debug, info, warn or error)")
 
 	v := viper.New()
 	v.AutomaticEnv()

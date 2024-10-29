@@ -24,7 +24,7 @@ func Command() *cobra.Command {
 		Short:   "Upload a profile",
 		GroupID: "utils",
 		Long:    "Upload a pprof profile from a Go application to the autopgo server",
-		Example: "autopgo upload --app hello-world example.profile",
+		Example: "autopgo upload -a hello-world example.profile",
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !profile.IsValidAppName(app) {
@@ -49,8 +49,8 @@ func Command() *cobra.Command {
 	}
 
 	flags := cmd.PersistentFlags()
-	flags.StringVar(&apiURL, "api-url", "http://localhost:8080", "Base URL of the autopgo server")
-	flags.StringVar(&app, "app", "", "The name of the application")
+	flags.StringVarP(&apiURL, "api-url", "u", "http://localhost:8080", "Base URL of the autopgo server")
+	flags.StringVarP(&app, "app", "a", "", "The name of the application")
 
 	cmd.MarkPersistentFlagRequired("app")
 

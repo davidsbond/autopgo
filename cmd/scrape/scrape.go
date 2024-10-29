@@ -53,7 +53,7 @@ func Command() *cobra.Command {
 	}
 
 	flags := cmd.PersistentFlags()
-	flags.StringVar(&apiURL, "api-url", "http://localhost:8080", "Base URL of the autopgo server")
+	flags.StringVarP(&apiURL, "api-url", "u", "http://localhost:8080", "Base URL of the autopgo server")
 
 	return cmd
 }

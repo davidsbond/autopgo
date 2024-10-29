@@ -56,7 +56,7 @@ func Command() *cobra.Command {
 	}
 
 	flags := cmd.PersistentFlags()
-	flags.IntVar(&port, "port", 8080, "Port to use for HTTP traffic")
+	flags.IntVarP(&port, "port", "p", 8080, "Port to use for HTTP traffic")
 	flags.StringVar(&eventWriterURL, "event-writer-url", "", "The URL to use for writing to the event bus")
 	flags.StringVar(&blobStoreURL, "blob-store-url", "", "The URL to use for connecting to blob storage")
 

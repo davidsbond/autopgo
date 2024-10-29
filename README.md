@@ -62,10 +62,10 @@ sampling behaviour and the targets available to be scraped. Below is an example 
 The `scrape` command also accepts some command-line flags that may also be set via environment variables. They are
 described in the table below:
 
-|     Flag      | Environment Variable |         Default         | Description                                                                              |
-|:-------------:|:--------------------:|:-----------------------:|:-----------------------------------------------------------------------------------------|
-| `--log-level` | `AUTOPGO_LOG_LEVEL`  |         `info`          | Controls the verbosity of log output, valid values are `debug`, `info`, `warn` & `error` |
-|  `--api-url`  |  `AUTOPGO_API_URL`   | `http://localhost:8080` | The base URL of the profile server where scraped profiles will be sent                   |
+|        Flag         | Environment Variable |         Default         | Description                                                                              |
+|:-------------------:|:--------------------:|:-----------------------:|:-----------------------------------------------------------------------------------------|
+| `--log-level`, `-l` | `AUTOPGO_LOG_LEVEL`  |         `info`          | Controls the verbosity of log output, valid values are `debug`, `info`, `warn` & `error` |
+|  `--api-url`, `-u`  |  `AUTOPGO_API_URL`   | `http://localhost:8080` | The base URL of the profile server where scraped profiles will be sent                   |
 
 #### Sampling
 
@@ -100,10 +100,10 @@ described in the table below:
 
 |         Flag         |    Environment Variable    | Default | Description                                                                                                                                      |
 |:--------------------:|:--------------------------:|:-------:|:-------------------------------------------------------------------------------------------------------------------------------------------------|
-|    `--log-level`     |    `AUTOPGO_LOG_LEVEL`     | `info`  | Controls the verbosity of log output, valid values are `debug`, `info`, `warn` & `error`                                                         |
+| `--log-level`, `-l`  |    `AUTOPGO_LOG_LEVEL`     | `info`  | Controls the verbosity of log output, valid values are `debug`, `info`, `warn` & `error`                                                         |
 | `--event-writer-url` | `AUTOPGO_EVENT_WRITER_URL` |  None   | Specifies the event bus to use for publishing profile events. See the documentation on [URLs](#url-configuration) for more details               |
 |  `--blob-store-url`  |  `AUTOPGO_BLOB_STORE_URL`  |  None   | Specifies the blob storage provider to use for reading & writing profiles.  See the documentation on [URLs](#url-configuration) for more details |
-|       `--port`       |       `AUTOPGO_PORT`       | `8080`  | Specifies the port to use for HTTP traffic                                                                                                       |
+|    `--port`, `-p`    |       `AUTOPGO_PORT`       | `8080`  | Specifies the port to use for HTTP traffic                                                                                                       |
 
 ### Worker
 
@@ -129,7 +129,7 @@ described in the table below:
 
 |         Flag         |    Environment Variable    | Default | Description                                                                                                                                      |
 |:--------------------:|:--------------------------:|:-------:|:-------------------------------------------------------------------------------------------------------------------------------------------------|
-|    `--log-level`     |    `AUTOPGO_LOG_LEVEL`     | `info`  | Controls the verbosity of log output, valid values are `debug`, `info`, `warn` & `error`                                                         |
+| `--log-level`, `-l`  |    `AUTOPGO_LOG_LEVEL`     | `info`  | Controls the verbosity of log output, valid values are `debug`, `info`, `warn` & `error`                                                         |
 | `--event-writer-url` | `AUTOPGO_EVENT_WRITER_URL` |  None   | Specifies the event bus to use for publishing profile events. See the documentation on [URLs](#url-configuration) for more details               |
 | `--event-reader-url` | `AUTOPGO_EVENT_READER_URL` |  None   | Specifies the event bus to use for consuming profile events. See the documentation on [URLs](#url-configuration) for more details                |
 |  `--blob-store-url`  |  `AUTOPGO_BLOB_STORE_URL`  |  None   | Specifies the blob storage provider to use for reading & writing profiles.  See the documentation on [URLs](#url-configuration) for more details |

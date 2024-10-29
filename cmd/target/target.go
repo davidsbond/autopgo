@@ -32,7 +32,7 @@ func Command() *cobra.Command {
 	}
 
 	flags := cmd.PersistentFlags()
-	flags.IntVar(&port, "port", 8081, "Port to use for HTTP traffic")
+	flags.IntVarP(&port, "port", "p", 8081, "Port to use for HTTP traffic")
 
 	return cmd
 }
