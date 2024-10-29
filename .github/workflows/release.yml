@@ -42,4 +42,6 @@ jobs:
       - name: Publish Release
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: goreleaser release --clean
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          args: release --clean
