@@ -48,7 +48,14 @@ func Command() *cobra.Command {
 			}
 			defer closers.Close(ctx, blobs)
 
-			return profile.NewWorker(blobs, reader, writer).Work(ctx)
+			worker := profile.NewWorker(blobs, writer)
+
+			types := []string{
+				profile.EventTypeMerged,
+				profile.EventTypeUploaded,
+			}
+
+			return reader.Read(ctx, types, worker.HandleEvent)
 		},
 	}
 

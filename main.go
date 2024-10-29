@@ -1,3 +1,5 @@
+//go:generate mockery
+
 // Package main contains the entrypoint to autopgo.
 package main
 

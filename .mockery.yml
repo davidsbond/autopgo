@@ -1,0 +1,11 @@
+with-expecter: true
+packages:
+  github.com/davidsbond/autopgo/internal/profile:
+    config:
+      recursive: true
+      dir: internal/profile/mocks
+      outpkg: mocks
+      filename: "{{ .InterfaceName }}.go"
+    interfaces:
+      BlobRepository: {}
+      EventWriter: {}

@@ -7,20 +7,18 @@ import (
 	"log/slog"
 	"path"
 
-	"github.com/davidsbond/autopgo/internal/logger"
-
 	"github.com/google/pprof/profile"
 
 	"github.com/davidsbond/autopgo/internal/blob"
 	"github.com/davidsbond/autopgo/internal/closers"
 	"github.com/davidsbond/autopgo/internal/event"
+	"github.com/davidsbond/autopgo/internal/logger"
 )
 
 type (
 	// The Worker type is used to handle profile events and merge uploaded profiles together into a single
 	// base profile.
 	Worker struct {
-		reader EventReader
 		writer EventWriter
 		blobs  BlobRepository
 	}
@@ -28,32 +26,24 @@ type (
 
 // NewWorker returns a new instance of the Worker type that will read and write profile data via the BlobRepository
 // implementation, read events via the EventReader implementation and publish events via the EventWriter implementation.
-func NewWorker(blobs BlobRepository, reader EventReader, writer EventWriter) *Worker {
+func NewWorker(blobs BlobRepository, writer EventWriter) *Worker {
 	return &Worker{
 		blobs:  blobs,
-		reader: reader,
 		writer: writer,
 	}
 }
 
-// Work inbound profile events. When an EventTypeUploaded event is handled, the newly uploaded profile is merged into
-// the base profile. When EventTypeMerged is handled, the uploaded profile is deleted from blob storage.
-func (w *Worker) Work(ctx context.Context) error {
-	types := []string{
-		EventTypeMerged,
-		EventTypeUploaded,
+// HandleEvent is an event.Handler implementation that is used to handle inbound profile events and perform profile
+// merge and deletion.
+func (w *Worker) HandleEvent(ctx context.Context, evt event.Envelope) error {
+	switch evt.Type {
+	case EventTypeUploaded:
+		return w.handleEventTypeUploaded(ctx, evt)
+	case EventTypeMerged:
+		return w.handleEventTypeMerged(ctx, evt)
+	default:
+		return nil
 	}
-
-	return w.reader.Read(ctx, types, func(ctx context.Context, evt event.Envelope) error {
-		switch evt.Type {
-		case EventTypeUploaded:
-			return w.handleEventTypeUploaded(ctx, evt)
-		case EventTypeMerged:
-			return w.handleEventTypeMerged(ctx, evt)
-		default:
-			return nil
-		}
-	})
 }
 
 func (w *Worker) handleEventTypeUploaded(ctx context.Context, evt event.Envelope) error {

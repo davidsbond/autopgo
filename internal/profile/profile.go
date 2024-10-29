@@ -29,14 +29,6 @@ type (
 		Write(ctx context.Context, evt event.Payload) error
 	}
 
-	// The EventReader interface describes types that can consume events from an event bus such as Kafka, NATS, SQS
-	// etc.
-	EventReader interface {
-		// Read should consume events from the event bus whose types match one of those provided in the types parameter.
-		// The event.Handler should be invoked for each inbound event.
-		Read(ctx context.Context, types []string, h event.Handler) error
-	}
-
 	// The UploadedEvent type is an event.Payload implementation describing a single profile that has been uploaded.
 	UploadedEvent struct {
 		// The application the profile relates to.
