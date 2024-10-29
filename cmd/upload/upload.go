@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/davidsbond/autopgo/internal/profile"
+	"github.com/davidsbond/autopgo/pkg/client"
 )
 
 // Command returns a cobra.Command instance used for the upload command.
@@ -33,7 +34,7 @@ func Command() *cobra.Command {
 			ctx := cmd.Context()
 			location := args[0]
 
-			client := profile.NewClient(apiURL)
+			cl := client.New(apiURL)
 
 			file, err := os.Open(location)
 			switch {
@@ -43,7 +44,7 @@ func Command() *cobra.Command {
 				return err
 			}
 
-			return client.Upload(ctx, app, file)
+			return cl.Upload(ctx, app, file)
 		},
 	}
 

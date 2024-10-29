@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/davidsbond/autopgo/internal/profile"
+	"github.com/davidsbond/autopgo/pkg/client"
 )
 
 // Command returns a cobra.Command instance used for the download command.
@@ -31,7 +32,7 @@ func Command() *cobra.Command {
 				return fmt.Errorf("%s is not a valid application name", app)
 			}
 
-			return profile.NewClient(apiURL).Download(ctx, app, os.Stdout)
+			return client.New(apiURL).Download(ctx, app, os.Stdout)
 		},
 	}
 

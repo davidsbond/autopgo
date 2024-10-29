@@ -1,4 +1,4 @@
-package profile
+package client
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"strconv"
 	"time"
 
 	"github.com/davidsbond/autopgo/internal/closers"
@@ -26,8 +27,8 @@ var (
 	ErrNotExist = errors.New("does not exist")
 )
 
-// NewClient returns a new instance of the Client type that makes HTTP requests to the provided base URL.
-func NewClient(baseURL string) *Client {
+// New returns a new instance of the Client type that makes HTTP requests to the provided base URL.
+func New(baseURL string) *Client {
 	return &Client{
 		baseURL: baseURL,
 		http: &http.Client{
@@ -98,6 +99,34 @@ func (c *Client) Download(ctx context.Context, app string, w io.Writer) error {
 	}
 
 	return nil
+}
+
+// Profile the provided src URL for the given duration. Returns an io.ReadCloser implementation that contains the
+// pprof profile.
+func (c *Client) Profile(ctx context.Context, src string, duration time.Duration) (io.ReadCloser, error) {
+	u, err := url.Parse(src)
+	if err != nil {
+		return nil, err
+	}
+
+	u.RawQuery = "seconds=" + strconv.FormatFloat(duration.Seconds(), 'g', -1, 64)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		defer closers.Close(ctx, resp.Body)
+		return nil, bodyToError(resp.Body)
+	}
+
+	return resp.Body, nil
 }
 
 func bodyToError(body io.Reader) error {

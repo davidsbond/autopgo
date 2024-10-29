@@ -3,6 +3,7 @@ package profile
 import (
 	"context"
 	"io"
+	"time"
 	"unicode/utf8"
 
 	"github.com/davidsbond/autopgo/internal/event"
@@ -27,6 +28,19 @@ type (
 	EventWriter interface {
 		// Write should push the given event payload onto the event bus.
 		Write(ctx context.Context, evt event.Payload) error
+	}
+
+	// The Client interface describes types that can interact with the profile server and targets for profiling.
+	Client interface {
+		// Upload should write the profile data stored within the io.Reader implementation to the profile server for
+		// a specified application.
+		Upload(ctx context.Context, app string, r io.Reader) error
+		// Download should write the contents of a pprof profile from the profile server to the io.Writer implementation
+		// for the specified application.
+		Download(ctx context.Context, app string, w io.Writer) error
+		// Profile should return an io.ReadCloser implementation that contains the pprof profile returned by the
+		// src URL. The profile should be performed for the given duration.
+		Profile(ctx context.Context, src string, duration time.Duration) (io.ReadCloser, error)
 	}
 
 	// The UploadedEvent type is an event.Payload implementation describing a single profile that has been uploaded.

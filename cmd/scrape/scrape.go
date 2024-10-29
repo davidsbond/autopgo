@@ -9,10 +9,15 @@ import (
 
 	"github.com/davidsbond/autopgo/internal/closers"
 	"github.com/davidsbond/autopgo/internal/profile"
+	"github.com/davidsbond/autopgo/pkg/client"
 )
 
 // Command returns a cobra.Command instance used to run the scraper.
 func Command() *cobra.Command {
+	var (
+		apiURL string
+	)
+
 	cmd := &cobra.Command{
 		Use:     "scrape <config>",
 		Short:   "Run the autopgo scraper",
@@ -42,9 +47,13 @@ func Command() *cobra.Command {
 				return err
 			}
 
-			return profile.NewScraper(config).Scrape(ctx)
+			cl := client.New(apiURL)
+			return profile.NewScraper(cl, config).Scrape(ctx)
 		},
 	}
+
+	flags := cmd.PersistentFlags()
+	flags.StringVar(&apiURL, "api-url", "http://localhost:8080", "Base URL of the autopgo server")
 
 	return cmd
 }

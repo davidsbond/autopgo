@@ -7,14 +7,10 @@ import (
 	"iter"
 	"log/slog"
 	"math/rand"
-	"net/http"
-	"net/url"
 	"slices"
-	"strconv"
 	"sync"
 	"time"
 
-	"github.com/davidsbond/autopgo/internal/closers"
 	"github.com/davidsbond/autopgo/internal/logger"
 )
 
@@ -22,8 +18,6 @@ type (
 	// The ScrapeConfig type describes the configuration used by the Scraper to sample pprof profiles from
 	// specified targets.
 	ScrapeConfig struct {
-		// The URL of the profile server that profiles should be forwarded to.
-		APIUrl string `json:"apiUrl"`
 		// How many profiles to obtain after the ProfileDuration has passed.
 		SampleSize int `json:"sampleSize"`
 		// How long targets should be profiled for, in seconds.
@@ -50,24 +44,20 @@ type (
 		profileDuration time.Duration
 		targets         []ScrapeTarget
 
-		client *Client
-		http   *http.Client
+		client Client
 		rand   *rand.Rand
 	}
 )
 
 // NewScraper returns a new instance of the Scraper type using the provided configuration.
-func NewScraper(config ScrapeConfig) *Scraper {
+func NewScraper(client Client, config ScrapeConfig) *Scraper {
 	return &Scraper{
 		sampleSize:      config.SampleSize,
 		targets:         config.Targets,
 		profileDuration: time.Duration(config.ProfileDuration) * time.Second,
 		scrapeFrequency: time.Duration(config.ScrapeFrequency) * time.Second,
 		rand:            rand.New(rand.NewSource(time.Now().UnixNano())),
-		client:          NewClient(config.APIUrl),
-		http: &http.Client{
-			Timeout: time.Duration(config.ProfileDuration) + time.Minute,
-		},
+		client:          client,
 	}
 }
 
@@ -126,41 +116,15 @@ func (s *Scraper) forwardProfile(ctx context.Context, group *sync.WaitGroup, tar
 		slog.String("target.app", target.App),
 	)
 
-	u, err := url.Parse(target.Address)
-	if err != nil {
-		log.With(slog.String("error", err.Error())).
-			ErrorContext(ctx, "failed to parse target address")
-		return
-	}
-
-	u.RawQuery = "?seconds=" + strconv.FormatFloat(s.profileDuration.Seconds(), 'g', -1, 64)
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
-	if err != nil {
-		log.With(slog.String("error", err.Error())).
-			ErrorContext(ctx, "failed to build request")
-		return
-	}
-
 	log.DebugContext(ctx, "profiling target")
-	resp, err := s.http.Do(req)
+	data, err := s.client.Profile(ctx, target.Address, s.profileDuration)
 	if err != nil {
 		log.With(slog.String("error", err.Error())).
-			ErrorContext(ctx, "failed to scrape profile")
+			ErrorContext(ctx, "failed to profile target")
 		return
 	}
 
-	defer closers.Close(ctx, resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		if err = bodyToError(resp.Body); err != nil {
-			log.With(slog.String("error", err.Error())).
-				ErrorContext(ctx, "failed to scrape profile")
-		}
-
-		return
-	}
-
-	if err = s.client.Upload(ctx, target.App, resp.Body); err != nil {
+	if err = s.client.Upload(ctx, target.App, data); err != nil {
 		log.With(slog.String("error", err.Error())).
 			ErrorContext(ctx, "failed to upload profile")
 		return
@@ -179,10 +143,6 @@ func (cfg ScrapeConfig) Validate() error {
 
 	if cfg.ProfileDuration <= 0 {
 		return errors.New("profile duration must be greater than 0")
-	}
-
-	if cfg.APIUrl == "" {
-		return errors.New("api url must be set")
 	}
 
 	if len(cfg.Targets) == 0 {
