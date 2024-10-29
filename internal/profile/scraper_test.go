@@ -1,10 +1,8 @@
 package profile_test
 
 import (
-	"bytes"
 	"context"
 	"errors"
-	"io"
 	"testing"
 	"time"
 
@@ -47,30 +45,16 @@ func TestScraper_Scrape(t *testing.T) {
 				},
 			},
 			Setup: func(client *mocks.MockClient) {
-				profileData := io.NopCloser(bytes.NewBuffer(validProfile))
-
 				client.EXPECT().
-					Profile(mock.Anything, "http://localhost:8080/debug/pprof/profile", time.Second*30).
-					Return(profileData, nil)
-
-				client.EXPECT().
-					Profile(mock.Anything, "http://localhost:8081/debug/pprof/profile", time.Second*30).
-					Return(profileData, nil)
-
-				client.EXPECT().
-					Profile(mock.Anything, "http://localhost:8082/debug/pprof/profile", time.Second*30).
-					Return(profileData, nil)
-
-				client.EXPECT().
-					Upload(mock.Anything, "test", profileData).
+					ProfileAndUpload(mock.Anything, "test", "http://localhost:8080/debug/pprof/profile", time.Second*30).
 					Return(nil)
 
 				client.EXPECT().
-					Upload(mock.Anything, "test-1", profileData).
+					ProfileAndUpload(mock.Anything, "test-1", "http://localhost:8081/debug/pprof/profile", time.Second*30).
 					Return(nil)
 
 				client.EXPECT().
-					Upload(mock.Anything, "test-2", profileData).
+					ProfileAndUpload(mock.Anything, "test-2", "http://localhost:8082/debug/pprof/profile", time.Second*30).
 					Return(nil)
 			},
 		},

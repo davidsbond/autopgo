@@ -113,19 +113,19 @@ func (c *Client) Download(ctx context.Context, app string, w io.Writer) error {
 	return nil
 }
 
-// Profile the provided src URL for the given duration. Returns an io.ReadCloser implementation that contains the
-// pprof profile.
-func (c *Client) Profile(ctx context.Context, src string, duration time.Duration) (io.ReadCloser, error) {
+// ProfileAndUpload profiles the provided src URL for the given duration. It then uploads the profile to the server
+// using the given application name.
+func (c *Client) ProfileAndUpload(ctx context.Context, app, src string, duration time.Duration) error {
 	u, err := url.Parse(src)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	u.RawQuery = "seconds=" + strconv.FormatFloat(duration.Seconds(), 'g', -1, 64)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	logger.FromContext(ctx).With(
@@ -135,15 +135,16 @@ func (c *Client) Profile(ctx context.Context, src string, duration time.Duration
 
 	resp, err := c.http.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
+	defer closers.Close(ctx, resp.Body)
 	if resp.StatusCode != http.StatusOK {
-		defer closers.Close(ctx, resp.Body)
-		return nil, bodyToError(resp.Body)
+
+		return bodyToError(resp.Body)
 	}
 
-	return resp.Body, nil
+	return c.Upload(ctx, app, resp.Body)
 }
 
 func bodyToError(body io.Reader) error {

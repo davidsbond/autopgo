@@ -38,9 +38,9 @@ type (
 		// Download should write the contents of a pprof profile from the profile server to the io.Writer implementation
 		// for the specified application.
 		Download(ctx context.Context, app string, w io.Writer) error
-		// Profile should return an io.ReadCloser implementation that contains the pprof profile returned by the
-		// src URL. The profile should be performed for the given duration.
-		Profile(ctx context.Context, src string, duration time.Duration) (io.ReadCloser, error)
+		// ProfileAndUpload should obtain a profile from the given src URL for the specified duration and upload it
+		// to the server for the specified application.
+		ProfileAndUpload(ctx context.Context, app, src string, duration time.Duration) error
 	}
 
 	// The UploadedEvent type is an event.Payload implementation describing a single profile that has been uploaded.

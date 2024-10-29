@@ -72,62 +72,51 @@ func (_c *MockClient_Download_Call) RunAndReturn(run func(context.Context, strin
 	return _c
 }
 
-// Profile provides a mock function with given fields: ctx, src, duration
-func (_m *MockClient) Profile(ctx context.Context, src string, duration time.Duration) (io.ReadCloser, error) {
-	ret := _m.Called(ctx, src, duration)
+// ProfileAndUpload provides a mock function with given fields: ctx, app, src, duration
+func (_m *MockClient) ProfileAndUpload(ctx context.Context, app string, src string, duration time.Duration) error {
+	ret := _m.Called(ctx, app, src, duration)
 
 	if len(ret) == 0 {
-		panic("no return value specified for Profile")
+		panic("no return value specified for ProfileAndUpload")
 	}
 
-	var r0 io.ReadCloser
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, time.Duration) (io.ReadCloser, error)); ok {
-		return rf(ctx, src, duration)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, time.Duration) io.ReadCloser); ok {
-		r0 = rf(ctx, src, duration)
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, time.Duration) error); ok {
+		r0 = rf(ctx, app, src, duration)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(io.ReadCloser)
-		}
+		r0 = ret.Error(0)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, time.Duration) error); ok {
-		r1 = rf(ctx, src, duration)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
+	return r0
 }
 
-// MockClient_Profile_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Profile'
-type MockClient_Profile_Call struct {
+// MockClient_ProfileAndUpload_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ProfileAndUpload'
+type MockClient_ProfileAndUpload_Call struct {
 	*mock.Call
 }
 
-// Profile is a helper method to define mock.On call
+// ProfileAndUpload is a helper method to define mock.On call
 //   - ctx context.Context
+//   - app string
 //   - src string
 //   - duration time.Duration
-func (_e *MockClient_Expecter) Profile(ctx interface{}, src interface{}, duration interface{}) *MockClient_Profile_Call {
-	return &MockClient_Profile_Call{Call: _e.mock.On("Profile", ctx, src, duration)}
+func (_e *MockClient_Expecter) ProfileAndUpload(ctx interface{}, app interface{}, src interface{}, duration interface{}) *MockClient_ProfileAndUpload_Call {
+	return &MockClient_ProfileAndUpload_Call{Call: _e.mock.On("ProfileAndUpload", ctx, app, src, duration)}
 }
 
-func (_c *MockClient_Profile_Call) Run(run func(ctx context.Context, src string, duration time.Duration)) *MockClient_Profile_Call {
+func (_c *MockClient_ProfileAndUpload_Call) Run(run func(ctx context.Context, app string, src string, duration time.Duration)) *MockClient_ProfileAndUpload_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(time.Duration))
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(time.Duration))
 	})
 	return _c
 }
 
-func (_c *MockClient_Profile_Call) Return(_a0 io.ReadCloser, _a1 error) *MockClient_Profile_Call {
-	_c.Call.Return(_a0, _a1)
+func (_c *MockClient_ProfileAndUpload_Call) Return(_a0 error) *MockClient_ProfileAndUpload_Call {
+	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *MockClient_Profile_Call) RunAndReturn(run func(context.Context, string, time.Duration) (io.ReadCloser, error)) *MockClient_Profile_Call {
+func (_c *MockClient_ProfileAndUpload_Call) RunAndReturn(run func(context.Context, string, string, time.Duration) error) *MockClient_ProfileAndUpload_Call {
 	_c.Call.Return(run)
 	return _c
 }
