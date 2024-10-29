@@ -37,8 +37,8 @@ func Middleware(logger *slog.Logger) server.Middleware {
 			ctx := ToContext(r.Context(), logger)
 
 			logger.With(
-				slog.String("method", r.Method),
-				slog.String("path", r.URL.Path),
+				slog.String("http.method", r.Method),
+				slog.String("http.path", r.URL.Path),
 			).DebugContext(ctx, "handling request")
 
 			next.ServeHTTP(w, r.WithContext(ctx))

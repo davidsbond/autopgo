@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/davidsbond/autopgo/internal/closers"
 	"github.com/davidsbond/autopgo/internal/logger"
 )
 
@@ -124,6 +125,7 @@ func (s *Scraper) forwardProfile(ctx context.Context, group *sync.WaitGroup, tar
 		return
 	}
 
+	defer closers.Close(ctx, data)
 	if err = s.client.Upload(ctx, target.App, data); err != nil {
 		log.With(slog.String("error", err.Error())).
 			ErrorContext(ctx, "failed to upload profile")

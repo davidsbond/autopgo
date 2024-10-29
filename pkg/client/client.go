@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"path"
@@ -12,6 +13,7 @@ import (
 	"time"
 
 	"github.com/davidsbond/autopgo/internal/closers"
+	"github.com/davidsbond/autopgo/internal/logger"
 )
 
 type (
@@ -51,6 +53,11 @@ func (c *Client) Upload(ctx context.Context, app string, r io.Reader) error {
 		return err
 	}
 
+	logger.FromContext(ctx).With(
+		slog.String("http.url", req.URL.String()),
+		slog.String("http.method", req.Method),
+	).DebugContext(ctx, "performing HTTP request")
+
 	resp, err := c.http.Do(req)
 	if err != nil {
 		return err
@@ -78,6 +85,11 @@ func (c *Client) Download(ctx context.Context, app string, w io.Writer) error {
 	if err != nil {
 		return err
 	}
+
+	logger.FromContext(ctx).With(
+		slog.String("http.url", req.URL.String()),
+		slog.String("http.method", req.Method),
+	).DebugContext(ctx, "performing HTTP request")
 
 	resp, err := c.http.Do(req)
 	if err != nil {
@@ -115,6 +127,11 @@ func (c *Client) Profile(ctx context.Context, src string, duration time.Duration
 	if err != nil {
 		return nil, err
 	}
+
+	logger.FromContext(ctx).With(
+		slog.String("http.url", req.URL.String()),
+		slog.String("http.method", req.Method),
+	).DebugContext(ctx, "performing HTTP request")
 
 	resp, err := c.http.Do(req)
 	if err != nil {
