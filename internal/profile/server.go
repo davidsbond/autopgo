@@ -9,11 +9,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/davidsbond/autopgo/internal/closers"
+	"github.com/google/pprof/profile"
 
 	"github.com/davidsbond/autopgo/internal/blob"
-
-	"github.com/google/pprof/profile"
+	"github.com/davidsbond/autopgo/internal/closers"
 )
 
 type (

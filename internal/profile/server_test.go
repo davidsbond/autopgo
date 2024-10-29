@@ -2,7 +2,6 @@ package profile_test
 
 import (
 	"bytes"
-	_ "embed"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -14,11 +13,6 @@ import (
 	"github.com/davidsbond/autopgo/internal/blob"
 	"github.com/davidsbond/autopgo/internal/profile"
 	"github.com/davidsbond/autopgo/internal/profile/mocks"
-)
-
-var (
-	//go:embed testdata/gobench.cpu
-	validProfile []byte
 )
 
 func TestHTTPController_Upload(t *testing.T) {

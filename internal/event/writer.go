@@ -7,13 +7,13 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/davidsbond/autopgo/internal/logger"
-
 	"cloud.google.com/go/pubsub/apiv1/pubsubpb"
 	servicebus "github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus"
 	"github.com/IBM/sarama"
 	snstypesv2 "github.com/aws/aws-sdk-go-v2/service/sns/types"
 	"gocloud.dev/pubsub"
+
+	"github.com/davidsbond/autopgo/internal/logger"
 )
 
 type (

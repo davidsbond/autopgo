@@ -7,13 +7,13 @@ import (
 	"io"
 	"log/slog"
 
-	"github.com/davidsbond/autopgo/internal/logger"
-
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/azureblob"
 	_ "gocloud.dev/blob/gcsblob"
 	_ "gocloud.dev/blob/s3blob"
 	"gocloud.dev/gcerrors"
+
+	"github.com/davidsbond/autopgo/internal/logger"
 )
 
 type (

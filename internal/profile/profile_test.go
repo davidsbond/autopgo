@@ -2,11 +2,20 @@ package profile_test
 
 import (
 	"bytes"
+	_ "embed"
+	"encoding/json"
 	"strings"
+	"testing"
 
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/davidsbond/autopgo/internal/profile"
+)
+
+var (
+	//go:embed testdata/gobench.cpu
+	validProfile []byte
 )
 
 func appKeyMatcher(app string) any {
@@ -49,3 +58,11 @@ func (n *ReadCloser) Read(b []byte) (int, error) {
 }
 
 func (n *ReadCloser) Close() error { return n.closeError }
+
+func mustMarshal(t *testing.T, v interface{}) []byte {
+	t.Helper()
+
+	b, err := json.Marshal(v)
+	require.NoError(t, err)
+	return b
+}
