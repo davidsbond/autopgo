@@ -41,8 +41,6 @@ sampling behaviour and the targets available to be scraped. Below is an example 
 
 ```json5
 {
-  // Base URL to the profile server, where scraped profiles are forwarded.
-  "apiUrl": "http://localhost:8080",
   // The maximum number of targets to sample at once.
   "sampleSize": 3,
   // How long targets should be profiled for, in seconds.
@@ -60,6 +58,14 @@ sampling behaviour and the targets available to be scraped. Below is an example 
   ]
 }
 ```
+
+The `scrape` command also accepts some command-line flags that may also be set via environment variables. They are
+described in the table below:
+
+|     Flag      | Environment Variable |         Default         | Description                                                                              |
+|:-------------:|:--------------------:|:-----------------------:|:-----------------------------------------------------------------------------------------|
+| `--log-level` | `AUTOPGO_LOG_LEVEL`  |         `info`          | Controls the verbosity of log output, valid values are `debug`, `info`, `warn` & `error` |
+|  `--api-url`  |  `AUTOPGO_API_URL`   | `http://localhost:8080` | The base URL of the profile server where scraped profiles will be sent                   |
 
 #### Sampling
 
