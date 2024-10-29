@@ -4,6 +4,7 @@ package target
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/davidsbond/autopgo/internal/logger"
 	"github.com/davidsbond/autopgo/internal/server"
 	"github.com/davidsbond/autopgo/internal/target"
 )
@@ -26,6 +27,9 @@ func Command() *cobra.Command {
 				Port: port,
 				Controllers: []server.Controller{
 					target.NewHTTPController(),
+				},
+				Middleware: []server.Middleware{
+					logger.Middleware(logger.FromContext(ctx)),
 				},
 			})
 		},
