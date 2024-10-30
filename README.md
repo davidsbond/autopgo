@@ -188,7 +188,7 @@ Event that indicates an uploaded profile has been merged with the base profile a
 }
 ```
 
-## URL Configuration
+### URL Configuration
 
 The [server](#server) and [worker](#worker) components both utilise URLs for configuring access to both blob storage and
 event buses. Currently, these URLs support:
@@ -209,3 +209,77 @@ profile. Autopgo uses [gocloud.dev](https://gocloud.dev) to provide general acce
 Please see their documentation for [pubsub](https://gocloud.dev/howto/pubsub/) and
 [blob](https://gocloud.dev/howto/blob/) to determine the URL string and additional environment variables required to
 configure the server & worker components.
+
+## Utilities
+
+This section outlines additional commands used to work with the main autopgo components.
+
+### Upload
+
+The CLI provides an `upload` command that can be used to manually upload a pprof profile to the [server](#server) to be
+merged with any existing profiles for that application.
+
+#### Command
+
+To upload a profile, use the following command, specifying the profile location as the only argument:
+
+```shell
+autopgo upload profile.pprof
+```
+
+#### Configuration
+
+The `upload` command also accepts some command-line flags that may also be set via environment variables. They are
+described in the table below:
+
+|        Flag         | Environment Variable |         Default         | Description                                                                              |
+|:-------------------:|:--------------------:|:-----------------------:|:-----------------------------------------------------------------------------------------|
+| `--log-level`, `-l` | `AUTOPGO_LOG_LEVEL`  |         `info`          | Controls the verbosity of log output, valid values are `debug`, `info`, `warn` & `error` |
+|  `--api-url`, `-u`  |  `AUTOPGO_API_URL`   | `http://localhost:8080` | The base URL of the profile server where the specified profile will be sent              |
+|    `--app`, `-a`    |    `AUTOPGO_APP`     |          None           | The name of the application the profile belongs to.                                      |
+
+### Download
+
+The CLI provides a `download` command that can be used to download a merged profile from the [server](#server).
+
+#### Command
+
+To upload a profile, use the following command, specifying the application name as the only argument:
+
+```shell
+autopgo download hello-world
+```
+
+#### Configuration
+
+The `upload` command also accepts some command-line flags that may also be set via environment variables. They are
+described in the table below:
+
+|        Flag         | Environment Variable |         Default         | Description                                                                              |
+|:-------------------:|:--------------------:|:-----------------------:|:-----------------------------------------------------------------------------------------|
+| `--log-level`, `-l` | `AUTOPGO_LOG_LEVEL`  |         `info`          | Controls the verbosity of log output, valid values are `debug`, `info`, `warn` & `error` |
+|  `--api-url`, `-u`  |  `AUTOPGO_API_URL`   | `http://localhost:8080` | The base URL of the profile server where the specified profile will be sent              |
+|  `--output`, `-o`   |   `AUTOPGO_OUTPUT`   |      `default.pgo`      | The location on the local file system to store the downloaded profile.                   |
+
+### Target
+
+The target command is used to spin up a basic HTTP application that exposes pprof endpoints. This is to be used as a
+test target for the [scraper](#scraper).
+
+#### Command
+
+To run the sample target, use the following command:
+
+```shell
+autopgo target
+```
+
+#### Configuration
+
+The `target` command also accepts some command-line flags that may also be set via environment variables. They are
+described in the table below:
+
+|        Flag         | Environment Variable | Default | Description                                                                              |
+|:-------------------:|:--------------------:|:-------:|:-----------------------------------------------------------------------------------------|
+| `--log-level`, `-l` | `AUTOPGO_LOG_LEVEL`  | `info`  | Controls the verbosity of log output, valid values are `debug`, `info`, `warn` & `error` |
+|   `--port`, `-p`    |    `AUTOPGO_PORT`    | `8081`  | Specifies the port to use for HTTP traffic                                               |
