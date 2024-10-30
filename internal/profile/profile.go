@@ -6,6 +6,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/davidsbond/autopgo/internal/blob"
 	"github.com/davidsbond/autopgo/internal/event"
 )
 
@@ -21,6 +22,8 @@ type (
 		// Delete should remove data stored under the given key from the blob store. It should return blob.ErrNotExist
 		// if no object exists at the given key.
 		Delete(ctx context.Context, key string) error
+		// List should return all objects within the repository that match the provided filter.
+		List(ctx context.Context, filter blob.ListFilter) ([]blob.Object, error)
 	}
 
 	// The EventWriter interface describes types that can publish events onto an event bus such as Kafka, NATS, SQS

@@ -134,6 +134,29 @@ described in the table below:
 | `--event-reader-url` | `AUTOPGO_EVENT_READER_URL` |  None   | Specifies the event bus to use for consuming profile events. See the documentation on [URLs](#url-configuration) for more details                |
 |  `--blob-store-url`  |  `AUTOPGO_BLOB_STORE_URL`  |  None   | Specifies the blob storage provider to use for reading & writing profiles.  See the documentation on [URLs](#url-configuration) for more details |
 
+### Target
+
+The target command is used to spin up a basic HTTP application that exposes pprof endpoints. This is to be used as a
+test target for the [scraper](#scraper).
+
+#### Command
+
+To run the sample target, use the following command:
+
+```shell
+autopgo target
+```
+
+#### Configuration
+
+The `target` command also accepts some command-line flags that may also be set via environment variables. They are
+described in the table below:
+
+|        Flag         | Environment Variable | Default | Description                                                                              |
+|:-------------------:|:--------------------:|:-------:|:-----------------------------------------------------------------------------------------|
+| `--log-level`, `-l` | `AUTOPGO_LOG_LEVEL`  | `info`  | Controls the verbosity of log output, valid values are `debug`, `info`, `warn` & `error` |
+|   `--port`, `-p`    |    `AUTOPGO_PORT`    | `8081`  | Specifies the port to use for HTTP traffic                                               |
+
 ## Events
 
 The [server](#server) and [worker](#worker) components communicate via events published to and read from an event bus.
@@ -261,25 +284,24 @@ described in the table below:
 |  `--api-url`, `-u`  |  `AUTOPGO_API_URL`   | `http://localhost:8080` | The base URL of the profile server where the specified profile will be sent              |
 |  `--output`, `-o`   |   `AUTOPGO_OUTPUT`   |      `default.pgo`      | The location on the local file system to store the downloaded profile.                   |
 
-### Target
+### List
 
-The target command is used to spin up a basic HTTP application that exposes pprof endpoints. This is to be used as a
-test target for the [scraper](#scraper).
+The CLI provides a `list` command that can be used to list all merged profiles managed by the [server](#server).
 
 #### Command
 
-To run the sample target, use the following command:
+To list profiles, use the following command:
 
 ```shell
-autopgo target
+autopgo list
 ```
 
 #### Configuration
 
-The `target` command also accepts some command-line flags that may also be set via environment variables. They are
+The `list` command also accepts some command-line flags that may also be set via environment variables. They are
 described in the table below:
 
-|        Flag         | Environment Variable | Default | Description                                                                              |
-|:-------------------:|:--------------------:|:-------:|:-----------------------------------------------------------------------------------------|
-| `--log-level`, `-l` | `AUTOPGO_LOG_LEVEL`  | `info`  | Controls the verbosity of log output, valid values are `debug`, `info`, `warn` & `error` |
-|   `--port`, `-p`    |    `AUTOPGO_PORT`    | `8081`  | Specifies the port to use for HTTP traffic                                               |
+|        Flag         | Environment Variable |         Default         | Description                                                                              |
+|:-------------------:|:--------------------:|:-----------------------:|:-----------------------------------------------------------------------------------------|
+| `--log-level`, `-l` | `AUTOPGO_LOG_LEVEL`  |         `info`          | Controls the verbosity of log output, valid values are `debug`, `info`, `warn` & `error` |
+|  `--api-url`, `-u`  |  `AUTOPGO_API_URL`   | `http://localhost:8080` | The base URL of the profile server where the specified profile will be sent              |

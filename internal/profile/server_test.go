@@ -2,14 +2,18 @@ package profile_test
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
+	"github.com/davidsbond/autopgo/internal/api"
 	"github.com/davidsbond/autopgo/internal/blob"
 	"github.com/davidsbond/autopgo/internal/profile"
 	"github.com/davidsbond/autopgo/internal/profile/mocks"
@@ -87,7 +91,7 @@ func TestHTTPController_Upload(t *testing.T) {
 		{
 			Name:           "success",
 			App:            "test-app",
-			ExpectedStatus: http.StatusOK,
+			ExpectedStatus: http.StatusCreated,
 			Profile:        validProfile,
 			Setup: func(blobs *mocks.MockBlobRepository, events *mocks.MockEventWriter) {
 				blobs.EXPECT().
@@ -196,6 +200,80 @@ func TestHTTPController_Download(t *testing.T) {
 			if tc.ExpectedProfile != nil {
 				assert.Equal(t, tc.ExpectedProfile, w.Body.Bytes())
 			}
+		})
+	}
+}
+
+func TestHTTPController_List(t *testing.T) {
+	t.Parallel()
+
+	tt := []struct {
+		Name           string
+		ExpectedStatus int
+		ExpectsError   bool
+		Expected       profile.ListResponse
+		Setup          func(blobs *mocks.MockBlobRepository)
+	}{
+		{
+			Name:           "success",
+			ExpectedStatus: http.StatusOK,
+			Expected: profile.ListResponse{
+				Profiles: []profile.Profile{
+					{
+						Key:          "test/default.pgo",
+						Size:         1000,
+						LastModified: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
+					},
+				},
+			},
+			Setup: func(blobs *mocks.MockBlobRepository) {
+				blobs.EXPECT().
+					List(mock.Anything, mock.Anything).
+					Return([]blob.Object{
+						{
+							Key:          "test/default.pgo",
+							Size:         1000,
+							LastModified: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
+						},
+					}, nil)
+			},
+		},
+		{
+			Name:           "returns errors",
+			ExpectedStatus: http.StatusInternalServerError,
+			ExpectsError:   true,
+			Setup: func(blobs *mocks.MockBlobRepository) {
+				blobs.EXPECT().
+					List(mock.Anything, mock.Anything).
+					Return(nil, io.EOF)
+			},
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.Name, func(t *testing.T) {
+			blobs := mocks.NewMockBlobRepository(t)
+			if tc.Setup != nil {
+				tc.Setup(blobs)
+			}
+
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodGet, "/", nil)
+
+			profile.NewHTTPController(blobs, nil).List(w, r)
+
+			assert.Equal(t, tc.ExpectedStatus, w.Code)
+			decoder := json.NewDecoder(w.Body)
+			if tc.ExpectsError {
+				var apiErr api.Error
+				require.NoError(t, decoder.Decode(&apiErr))
+				assert.EqualValues(t, tc.ExpectedStatus, apiErr.Code)
+				return
+			}
+
+			var actual profile.ListResponse
+			require.NoError(t, decoder.Decode(&actual))
+			assert.EqualValues(t, tc.Expected, actual)
 		})
 	}
 }
