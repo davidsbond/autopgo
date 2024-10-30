@@ -7,10 +7,13 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/davidsbond/autopgo/internal/api"
+	"github.com/davidsbond/autopgo/internal/profile"
 	"github.com/davidsbond/autopgo/pkg/client"
 )
 
@@ -36,6 +39,9 @@ func TestClient_Upload(t *testing.T) {
 					body, err := io.ReadAll(r.Body)
 					require.NoError(t, err)
 					assert.EqualValues(t, []byte("test"), body)
+					api.Respond(r.Context(), w, http.StatusCreated, profile.UploadResponse{
+						Key: "test",
+					})
 				})
 			},
 		},
@@ -46,7 +52,7 @@ func TestClient_Upload(t *testing.T) {
 			ExpectsError: true,
 			Setup: func(t *testing.T) http.Handler {
 				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					http.Error(w, "uh oh", http.StatusInternalServerError)
+					api.ErrorResponse(r.Context(), w, "uh oh", http.StatusInternalServerError)
 				})
 			},
 		},
@@ -100,7 +106,7 @@ func TestClient_Download(t *testing.T) {
 			ExpectsError: true,
 			Setup: func(t *testing.T) http.Handler {
 				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					http.Error(w, "uh oh", http.StatusNotFound)
+					api.ErrorResponse(r.Context(), w, "uh oh", http.StatusNotFound)
 				})
 			},
 		},
@@ -110,7 +116,7 @@ func TestClient_Download(t *testing.T) {
 			ExpectsError: true,
 			Setup: func(t *testing.T) http.Handler {
 				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					http.Error(w, "uh oh", http.StatusInternalServerError)
+					api.ErrorResponse(r.Context(), w, "uh oh", http.StatusInternalServerError)
 				})
 			},
 		},
@@ -132,6 +138,62 @@ func TestClient_Download(t *testing.T) {
 
 			assert.NoError(t, err)
 			assert.EqualValues(t, tc.Expected, data.Bytes())
+		})
+	}
+}
+
+func TestClient_List(t *testing.T) {
+	t.Parallel()
+
+	tt := []struct {
+		Name         string
+		Setup        func(t *testing.T) http.Handler
+		ExpectsError bool
+		Expected     []profile.Profile
+	}{
+		{
+			Name: "successful list",
+			Expected: []profile.Profile{
+				{
+					Key:          "test",
+					Size:         1000,
+					LastModified: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
+				},
+			},
+			Setup: func(t *testing.T) http.Handler {
+				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					assert.EqualValues(t, http.MethodGet, r.Method)
+					assert.EqualValues(t, "/api/profile", r.URL.Path)
+
+					api.Respond(r.Context(), w, http.StatusOK, profile.ListResponse{
+						Profiles: []profile.Profile{
+							{
+								Key:          "test",
+								Size:         1000,
+								LastModified: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
+							},
+						},
+					})
+				})
+			},
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.Name, func(t *testing.T) {
+			handler := tc.Setup(t)
+			server := httptest.NewServer(handler)
+			defer server.Close()
+
+			cl := client.New(server.URL)
+			actual, err := cl.List(context.Background())
+			if tc.ExpectsError {
+				assert.Error(t, err)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.EqualValues(t, tc.Expected, actual)
 		})
 	}
 }

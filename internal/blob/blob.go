@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"log/slog"
+	"time"
 
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/azureblob"
@@ -20,6 +21,19 @@ type (
 	// The Bucket type is used to read, write & delete objects from a blob storage provider.
 	Bucket struct {
 		blob *blob.Bucket
+	}
+
+	// The ListFilter function allows callers of Bucket.List to programmatically filter results.
+	ListFilter func(obj Object) bool
+
+	// The Object type contains metadata on an object within the blob store.
+	Object struct {
+		// The object's key.
+		Key string
+		// The object's size in bytes.
+		Size int64
+		// When the object was last modified.
+		LastModified time.Time
 	}
 )
 
@@ -88,5 +102,37 @@ func (b *Bucket) Delete(ctx context.Context, path string) error {
 		return err
 	default:
 		return nil
+	}
+}
+
+// List objects within the bucket that match the given ListFilter. Provide a nil ListFilter to return all objects.
+func (b *Bucket) List(ctx context.Context, filter ListFilter) ([]Object, error) {
+	items := make([]Object, 0)
+
+	iterator := b.blob.List(&blob.ListOptions{})
+	for {
+		item, err := iterator.Next(ctx)
+		switch {
+		case errors.Is(err, io.EOF):
+			return items, nil
+		case err != nil:
+			return nil, err
+		}
+
+		if item.IsDir {
+			continue
+		}
+
+		obj := Object{
+			Key:          item.Key,
+			Size:         item.Size,
+			LastModified: item.ModTime,
+		}
+
+		if filter != nil && !filter(obj) {
+			continue
+		}
+
+		items = append(items, obj)
 	}
 }

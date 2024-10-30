@@ -19,7 +19,7 @@ func Command() *cobra.Command {
 		Short: "Run an example scraping target",
 		Long: "Starts a basic HTTP application that exposes pprof endpoints. This can be used to test the scraper\n" +
 			"component.",
-		GroupID: "utils",
+		GroupID: "component",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 

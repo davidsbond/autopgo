@@ -18,6 +18,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/davidsbond/autopgo/cmd/download"
+	"github.com/davidsbond/autopgo/cmd/list"
 	"github.com/davidsbond/autopgo/cmd/scrape"
 	"github.com/davidsbond/autopgo/cmd/server"
 	"github.com/davidsbond/autopgo/cmd/target"
@@ -82,6 +83,7 @@ func main() {
 		server.Command(),
 		scrape.Command(),
 		target.Command(),
+		list.Command(),
 	)
 
 	flags := cmd.PersistentFlags()

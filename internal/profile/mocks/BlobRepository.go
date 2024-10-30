@@ -4,6 +4,9 @@ package mocks
 
 import (
 	context "context"
+
+	blob "github.com/davidsbond/autopgo/internal/blob"
+
 	io "io"
 
 	mock "github.com/stretchr/testify/mock"
@@ -65,6 +68,65 @@ func (_c *MockBlobRepository_Delete_Call) Return(_a0 error) *MockBlobRepository_
 }
 
 func (_c *MockBlobRepository_Delete_Call) RunAndReturn(run func(context.Context, string) error) *MockBlobRepository_Delete_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// List provides a mock function with given fields: ctx, filter
+func (_m *MockBlobRepository) List(ctx context.Context, filter blob.ListFilter) ([]blob.Object, error) {
+	ret := _m.Called(ctx, filter)
+
+	if len(ret) == 0 {
+		panic("no return value specified for List")
+	}
+
+	var r0 []blob.Object
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, blob.ListFilter) ([]blob.Object, error)); ok {
+		return rf(ctx, filter)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, blob.ListFilter) []blob.Object); ok {
+		r0 = rf(ctx, filter)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]blob.Object)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, blob.ListFilter) error); ok {
+		r1 = rf(ctx, filter)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockBlobRepository_List_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'List'
+type MockBlobRepository_List_Call struct {
+	*mock.Call
+}
+
+// List is a helper method to define mock.On call
+//   - ctx context.Context
+//   - filter blob.ListFilter
+func (_e *MockBlobRepository_Expecter) List(ctx interface{}, filter interface{}) *MockBlobRepository_List_Call {
+	return &MockBlobRepository_List_Call{Call: _e.mock.On("List", ctx, filter)}
+}
+
+func (_c *MockBlobRepository_List_Call) Run(run func(ctx context.Context, filter blob.ListFilter)) *MockBlobRepository_List_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(blob.ListFilter))
+	})
+	return _c
+}
+
+func (_c *MockBlobRepository_List_Call) Return(_a0 []blob.Object, _a1 error) *MockBlobRepository_List_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockBlobRepository_List_Call) RunAndReturn(run func(context.Context, blob.ListFilter) ([]blob.Object, error)) *MockBlobRepository_List_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -12,8 +13,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/davidsbond/autopgo/internal/api"
 	"github.com/davidsbond/autopgo/internal/closers"
 	"github.com/davidsbond/autopgo/internal/logger"
+	"github.com/davidsbond/autopgo/internal/profile"
 )
 
 type (
@@ -64,7 +67,7 @@ func (c *Client) Upload(ctx context.Context, app string, r io.Reader) error {
 	}
 	defer closers.Close(ctx, resp.Body)
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusCreated {
 		return bodyToError(resp.Body)
 	}
 
@@ -97,12 +100,7 @@ func (c *Client) Download(ctx context.Context, app string, w io.Writer) error {
 	}
 	defer closers.Close(ctx, resp.Body)
 
-	switch resp.StatusCode {
-	case http.StatusOK:
-		break
-	case http.StatusNotFound:
-		return ErrNotExist
-	default:
+	if resp.StatusCode != http.StatusOK {
 		return bodyToError(resp.Body)
 	}
 
@@ -140,18 +138,54 @@ func (c *Client) ProfileAndUpload(ctx context.Context, app, src string, duration
 
 	defer closers.Close(ctx, resp.Body)
 	if resp.StatusCode != http.StatusOK {
-
-		return bodyToError(resp.Body)
+		return fmt.Errorf("target endpoint returned %d", resp.StatusCode)
 	}
 
 	return c.Upload(ctx, app, resp.Body)
 }
 
-func bodyToError(body io.Reader) error {
-	data, err := io.ReadAll(body)
+// List all profiles stored within the server.
+func (c *Client) List(ctx context.Context) ([]profile.Profile, error) {
+	u, err := url.Parse(c.baseURL)
 	if err != nil {
-		return fmt.Errorf("could not read body: %w", err)
+		return nil, err
 	}
 
-	return errors.New(string(data))
+	u.Path = path.Join("/api", "profile")
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.FromContext(ctx).With(
+		slog.String("http.url", req.URL.String()),
+		slog.String("http.method", req.Method),
+	).DebugContext(ctx, "performing HTTP request")
+
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer closers.Close(ctx, resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, bodyToError(resp.Body)
+	}
+
+	var list profile.ListResponse
+	if err = json.NewDecoder(resp.Body).Decode(&list); err != nil {
+		return nil, err
+	}
+
+	return list.Profiles, nil
+}
+
+func bodyToError(body io.Reader) error {
+	var apiErr api.Error
+	if err := json.NewDecoder(body).Decode(&apiErr); err != nil {
+		return err
+	}
+
+	return apiErr
 }
