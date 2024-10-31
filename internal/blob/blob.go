@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"iter"
 	"log/slog"
 	"time"
 
@@ -105,34 +106,46 @@ func (b *Bucket) Delete(ctx context.Context, path string) error {
 	}
 }
 
-// List objects within the bucket that match the given ListFilter. Provide a nil ListFilter to return all objects.
-func (b *Bucket) List(ctx context.Context, filter ListFilter) ([]Object, error) {
-	items := make([]Object, 0)
-
+// List objects within the bucket that match the given ListFilter. Provide a nil ListFilter to return all objects. This
+// method returns an iterator so is used with a range statement. The second range parameter is an error that must be
+// checked on each iteration.
+func (b *Bucket) List(ctx context.Context, filter ListFilter) iter.Seq2[Object, error] {
 	iterator := b.blob.List(&blob.ListOptions{})
-	for {
-		item, err := iterator.Next(ctx)
-		switch {
-		case errors.Is(err, io.EOF):
-			return items, nil
-		case err != nil:
-			return nil, err
-		}
 
-		if item.IsDir {
-			continue
-		}
+	return func(yield func(Object, error) bool) {
+		for {
+			item, err := iterator.Next(ctx)
+			switch {
+			case errors.Is(err, io.EOF):
+				return
+			case err != nil:
+				if !yield(Object{}, err) {
+					return
+				}
+			}
 
-		obj := Object{
-			Key:          item.Key,
-			Size:         item.Size,
-			LastModified: item.ModTime,
-		}
+			if item.IsDir {
+				continue
+			}
 
-		if filter != nil && !filter(obj) {
-			continue
-		}
+			obj := Object{
+				Key:          item.Key,
+				Size:         item.Size,
+				LastModified: item.ModTime,
+			}
 
-		items = append(items, obj)
+			if filter != nil && !filter(obj) {
+				continue
+			}
+
+			if !yield(obj, nil) {
+				return
+			}
+		}
 	}
+}
+
+// Exists returns true if an object exists at the given path.
+func (b *Bucket) Exists(ctx context.Context, path string) (bool, error) {
+	return b.blob.Exists(ctx, path)
 }

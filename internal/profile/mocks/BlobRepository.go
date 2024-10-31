@@ -9,6 +9,8 @@ import (
 
 	io "io"
 
+	iter "iter"
+
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -72,34 +74,81 @@ func (_c *MockBlobRepository_Delete_Call) RunAndReturn(run func(context.Context,
 	return _c
 }
 
+// Exists provides a mock function with given fields: ctx, path
+func (_m *MockBlobRepository) Exists(ctx context.Context, path string) (bool, error) {
+	ret := _m.Called(ctx, path)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Exists")
+	}
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (bool, error)); ok {
+		return rf(ctx, path)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
+		r0 = rf(ctx, path)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, path)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockBlobRepository_Exists_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Exists'
+type MockBlobRepository_Exists_Call struct {
+	*mock.Call
+}
+
+// Exists is a helper method to define mock.On call
+//   - ctx context.Context
+//   - path string
+func (_e *MockBlobRepository_Expecter) Exists(ctx interface{}, path interface{}) *MockBlobRepository_Exists_Call {
+	return &MockBlobRepository_Exists_Call{Call: _e.mock.On("Exists", ctx, path)}
+}
+
+func (_c *MockBlobRepository_Exists_Call) Run(run func(ctx context.Context, path string)) *MockBlobRepository_Exists_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockBlobRepository_Exists_Call) Return(_a0 bool, _a1 error) *MockBlobRepository_Exists_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockBlobRepository_Exists_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *MockBlobRepository_Exists_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // List provides a mock function with given fields: ctx, filter
-func (_m *MockBlobRepository) List(ctx context.Context, filter blob.ListFilter) ([]blob.Object, error) {
+func (_m *MockBlobRepository) List(ctx context.Context, filter blob.ListFilter) iter.Seq2[blob.Object, error] {
 	ret := _m.Called(ctx, filter)
 
 	if len(ret) == 0 {
 		panic("no return value specified for List")
 	}
 
-	var r0 []blob.Object
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, blob.ListFilter) ([]blob.Object, error)); ok {
-		return rf(ctx, filter)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, blob.ListFilter) []blob.Object); ok {
+	var r0 iter.Seq2[blob.Object, error]
+	if rf, ok := ret.Get(0).(func(context.Context, blob.ListFilter) iter.Seq2[blob.Object, error]); ok {
 		r0 = rf(ctx, filter)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]blob.Object)
+			r0 = ret.Get(0).(iter.Seq2[blob.Object, error])
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, blob.ListFilter) error); ok {
-		r1 = rf(ctx, filter)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
+	return r0
 }
 
 // MockBlobRepository_List_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'List'
@@ -121,12 +170,12 @@ func (_c *MockBlobRepository_List_Call) Run(run func(ctx context.Context, filter
 	return _c
 }
 
-func (_c *MockBlobRepository_List_Call) Return(_a0 []blob.Object, _a1 error) *MockBlobRepository_List_Call {
-	_c.Call.Return(_a0, _a1)
+func (_c *MockBlobRepository_List_Call) Return(_a0 iter.Seq2[blob.Object, error]) *MockBlobRepository_List_Call {
+	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *MockBlobRepository_List_Call) RunAndReturn(run func(context.Context, blob.ListFilter) ([]blob.Object, error)) *MockBlobRepository_List_Call {
+func (_c *MockBlobRepository_List_Call) RunAndReturn(run func(context.Context, blob.ListFilter) iter.Seq2[blob.Object, error]) *MockBlobRepository_List_Call {
 	_c.Call.Return(run)
 	return _c
 }

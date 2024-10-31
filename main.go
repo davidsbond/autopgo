@@ -17,6 +17,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
+	delete "github.com/davidsbond/autopgo/cmd/delete"
 	"github.com/davidsbond/autopgo/cmd/download"
 	"github.com/davidsbond/autopgo/cmd/list"
 	"github.com/davidsbond/autopgo/cmd/scrape"
@@ -84,6 +85,7 @@ func main() {
 		scrape.Command(),
 		target.Command(),
 		list.Command(),
+		delete.Command(),
 	)
 
 	flags := cmd.PersistentFlags()

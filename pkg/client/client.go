@@ -3,7 +3,6 @@ package client
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -25,11 +24,6 @@ type (
 		baseURL string
 		http    *http.Client
 	}
-)
-
-var (
-	// ErrNotExist is the error used to indicate a specified profile does not exist.
-	ErrNotExist = errors.New("does not exist")
 )
 
 // New returns a new instance of the Client type that makes HTTP requests to the provided base URL.
@@ -179,6 +173,37 @@ func (c *Client) List(ctx context.Context) ([]profile.Profile, error) {
 	}
 
 	return list.Profiles, nil
+}
+
+// Delete an application's profile.
+func (c *Client) Delete(ctx context.Context, app string) error {
+	u, err := url.Parse(c.baseURL)
+	if err != nil {
+		return err
+	}
+
+	u.Path = path.Join("/api", "profile", app)
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, u.String(), nil)
+	if err != nil {
+		return err
+	}
+
+	logger.FromContext(ctx).With(
+		slog.String("http.url", req.URL.String()),
+		slog.String("http.method", req.Method),
+	).DebugContext(ctx, "performing HTTP request")
+
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return err
+	}
+	defer closers.Close(ctx, resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		return bodyToError(resp.Body)
+	}
+
+	return nil
 }
 
 func bodyToError(body io.Reader) error {
