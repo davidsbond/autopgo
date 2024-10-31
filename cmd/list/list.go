@@ -4,8 +4,8 @@ package list
 import (
 	"fmt"
 	"os"
-	"path"
 	"text/tabwriter"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -36,7 +36,9 @@ func Command() *cobra.Command {
 			}
 
 			for _, profile := range profiles {
-				if _, err = fmt.Fprintf(writer, "%s\t%d\t%s\n", path.Dir(profile.Key), profile.Size, profile.LastModified); err != nil {
+				lastModified := time.Since(profile.LastModified).Truncate(time.Second)
+
+				if _, err = fmt.Fprintf(writer, "%s\t%d\t%s\n", profile.Key, profile.Size, lastModified); err != nil {
 					return err
 				}
 			}

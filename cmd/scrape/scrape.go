@@ -6,9 +6,11 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/davidsbond/autopgo/internal/closers"
 	"github.com/davidsbond/autopgo/internal/profile"
+	"github.com/davidsbond/autopgo/internal/server"
 	"github.com/davidsbond/autopgo/pkg/client"
 )
 
@@ -16,6 +18,7 @@ import (
 func Command() *cobra.Command {
 	var (
 		apiURL string
+		port   int
 	)
 
 	cmd := &cobra.Command{
@@ -48,12 +51,24 @@ func Command() *cobra.Command {
 			}
 
 			cl := client.New(apiURL)
-			return profile.NewScraper(cl, config).Scrape(ctx)
+
+			group, ctx := errgroup.WithContext(ctx)
+			group.Go(func() error {
+				return profile.NewScraper(cl, config).Scrape(ctx)
+			})
+			group.Go(func() error {
+				return server.Run(ctx, server.Config{
+					Port: port,
+				})
+			})
+
+			return group.Wait()
 		},
 	}
 
 	flags := cmd.PersistentFlags()
 	flags.StringVarP(&apiURL, "api-url", "u", "http://localhost:8080", "Base URL of the autopgo server")
+	flags.IntVarP(&port, "port", "p", 8082, "Port to use for HTTP traffic")
 
 	return cmd
 }

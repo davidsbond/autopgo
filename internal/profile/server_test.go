@@ -220,7 +220,7 @@ func TestHTTPController_List(t *testing.T) {
 			Expected: profile.ListResponse{
 				Profiles: []profile.Profile{
 					{
-						Key:          "test/default.pgo",
+						Key:          "test",
 						Size:         1000,
 						LastModified: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
 					},
