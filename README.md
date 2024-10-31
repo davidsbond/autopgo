@@ -134,29 +134,6 @@ described in the table below:
 | `--event-reader-url` | `AUTOPGO_EVENT_READER_URL` |  None   | Specifies the event bus to use for consuming profile events. See the documentation on [URLs](#url-configuration) for more details                |
 |  `--blob-store-url`  |  `AUTOPGO_BLOB_STORE_URL`  |  None   | Specifies the blob storage provider to use for reading & writing profiles.  See the documentation on [URLs](#url-configuration) for more details |
 
-### Target
-
-The target command is used to spin up a basic HTTP application that exposes pprof endpoints. This is to be used as a
-test target for the [scraper](#scraper).
-
-#### Command
-
-To run the sample target, use the following command:
-
-```shell
-autopgo target
-```
-
-#### Configuration
-
-The `target` command also accepts some command-line flags that may also be set via environment variables. They are
-described in the table below:
-
-|        Flag         | Environment Variable | Default | Description                                                                              |
-|:-------------------:|:--------------------:|:-------:|:-----------------------------------------------------------------------------------------|
-| `--log-level`, `-l` | `AUTOPGO_LOG_LEVEL`  | `info`  | Controls the verbosity of log output, valid values are `debug`, `info`, `warn` & `error` |
-|   `--port`, `-p`    |    `AUTOPGO_PORT`    | `8081`  | Specifies the port to use for HTTP traffic                                               |
-
 ## Events
 
 The [server](#server) and [worker](#worker) components communicate via events published to and read from an event bus.
