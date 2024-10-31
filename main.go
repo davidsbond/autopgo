@@ -22,7 +22,6 @@ import (
 	"github.com/davidsbond/autopgo/cmd/list"
 	"github.com/davidsbond/autopgo/cmd/scrape"
 	"github.com/davidsbond/autopgo/cmd/server"
-	"github.com/davidsbond/autopgo/cmd/target"
 	"github.com/davidsbond/autopgo/cmd/upload"
 	"github.com/davidsbond/autopgo/cmd/worker"
 	"github.com/davidsbond/autopgo/internal/logger"
@@ -83,7 +82,6 @@ func main() {
 		download.Command(),
 		server.Command(),
 		scrape.Command(),
-		target.Command(),
 		list.Command(),
 		delete.Command(),
 	)

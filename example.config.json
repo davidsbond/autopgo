@@ -4,8 +4,8 @@
   "scrapeFrequency": 30,
   "targets": [
     {
-      "app": "test",
-      "address": "http://localhost:8081/debug/pprof/profile"
+      "app": "autopgo",
+      "address": "http://localhost:8080/debug/pprof/profile"
     }
   ]
 }
