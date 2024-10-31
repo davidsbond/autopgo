@@ -6,6 +6,14 @@
     {
       "app": "autopgo",
       "address": "http://localhost:8080/debug/pprof/profile"
+    },
+    {
+      "app": "autopgo",
+      "address": "http://localhost:8081/debug/pprof/profile"
+    },
+    {
+      "app": "autopgo",
+      "address": "http://localhost:8082/debug/pprof/profile"
     }
   ]
 }

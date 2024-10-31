@@ -66,6 +66,7 @@ described in the table below:
 |:-------------------:|:--------------------:|:-----------------------:|:-----------------------------------------------------------------------------------------|
 | `--log-level`, `-l` | `AUTOPGO_LOG_LEVEL`  |         `info`          | Controls the verbosity of log output, valid values are `debug`, `info`, `warn` & `error` |
 |  `--api-url`, `-u`  |  `AUTOPGO_API_URL`   | `http://localhost:8080` | The base URL of the profile server where scraped profiles will be sent                   |
+|   `--port`, `-p`    |    `AUTOPGO_PORT`    |         `8080`          | Specifies the port to use for HTTP traffic                                               |
 
 #### Sampling
 
@@ -133,6 +134,7 @@ described in the table below:
 | `--event-writer-url` | `AUTOPGO_EVENT_WRITER_URL` |  None   | Specifies the event bus to use for publishing profile events. See the documentation on [URLs](#url-configuration) for more details               |
 | `--event-reader-url` | `AUTOPGO_EVENT_READER_URL` |  None   | Specifies the event bus to use for consuming profile events. See the documentation on [URLs](#url-configuration) for more details                |
 |  `--blob-store-url`  |  `AUTOPGO_BLOB_STORE_URL`  |  None   | Specifies the blob storage provider to use for reading & writing profiles.  See the documentation on [URLs](#url-configuration) for more details |
+|    `--port`, `-p`    |       `AUTOPGO_PORT`       | `8080`  | Specifies the port to use for HTTP traffic                                                                                                       |
 
 ## Events
 

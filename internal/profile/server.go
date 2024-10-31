@@ -67,7 +67,7 @@ func (h *HTTPController) Upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	now := time.Now().Unix()
+	now := time.Now().UnixNano()
 	key := path.Join(app, "staging", strconv.FormatInt(now, 10))
 	writer, err := h.blobs.NewWriter(ctx, key)
 	if err != nil {
@@ -161,7 +161,7 @@ func (h *HTTPController) List(w http.ResponseWriter, r *http.Request) {
 		}
 
 		profiles = append(profiles, Profile{
-			Key:          item.Key,
+			Key:          path.Dir(item.Key),
 			Size:         item.Size,
 			LastModified: item.LastModified,
 		})

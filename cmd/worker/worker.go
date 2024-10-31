@@ -3,11 +3,13 @@ package worker
 
 import (
 	"github.com/spf13/cobra"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/davidsbond/autopgo/internal/blob"
 	"github.com/davidsbond/autopgo/internal/closers"
 	"github.com/davidsbond/autopgo/internal/event"
 	"github.com/davidsbond/autopgo/internal/profile"
+	"github.com/davidsbond/autopgo/internal/server"
 )
 
 // Command returns a cobra.Command instance used to run the worker.
@@ -16,6 +18,7 @@ func Command() *cobra.Command {
 		eventReaderURL string
 		eventWriterURL string
 		blobStoreURL   string
+		port           int
 	)
 
 	cmd := &cobra.Command{
@@ -55,7 +58,17 @@ func Command() *cobra.Command {
 				profile.EventTypeUploaded,
 			}
 
-			return reader.Read(ctx, types, worker.HandleEvent)
+			group, ctx := errgroup.WithContext(ctx)
+			group.Go(func() error {
+				return reader.Read(ctx, types, worker.HandleEvent)
+			})
+			group.Go(func() error {
+				return server.Run(ctx, server.Config{
+					Port: port,
+				})
+			})
+
+			return group.Wait()
 		},
 	}
 
@@ -63,6 +76,7 @@ func Command() *cobra.Command {
 	flags.StringVar(&eventReaderURL, "event-reader-url", "", "The URL to use for reading from the event bus")
 	flags.StringVar(&eventWriterURL, "event-writer-url", "", "The URL to use for writing to the event bus")
 	flags.StringVar(&blobStoreURL, "blob-store-url", "", "The URL to use for connecting to blob storage")
+	flags.IntVarP(&port, "port", "p", 8081, "Port to use for HTTP traffic")
 
 	cmd.MarkPersistentFlagRequired("blob-store-url")
 	cmd.MarkPersistentFlagRequired("event-reader-url")
