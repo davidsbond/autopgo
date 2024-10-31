@@ -3,6 +3,7 @@ package profile
 import (
 	"context"
 	"io"
+	"iter"
 	"time"
 	"unicode/utf8"
 
@@ -23,7 +24,9 @@ type (
 		// if no object exists at the given key.
 		Delete(ctx context.Context, key string) error
 		// List should return all objects within the repository that match the provided filter.
-		List(ctx context.Context, filter blob.ListFilter) ([]blob.Object, error)
+		List(ctx context.Context, filter blob.ListFilter) iter.Seq2[blob.Object, error]
+		// Exists should return true if an object exists at the given path.
+		Exists(ctx context.Context, path string) (bool, error)
 	}
 
 	// The EventWriter interface describes types that can publish events onto an event bus such as Kafka, NATS, SQS

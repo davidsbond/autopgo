@@ -39,6 +39,7 @@ func (h *HTTPController) Register(m *http.ServeMux) {
 	m.HandleFunc("POST /api/profile/{app}", h.Upload)
 	m.HandleFunc("GET /api/profile/{app}", h.Download)
 	m.HandleFunc("GET /api/profile", h.List)
+	m.HandleFunc("DELETE /api/profile/{app}", h.Delete)
 }
 
 type (
@@ -152,20 +153,68 @@ func (h *HTTPController) List(w http.ResponseWriter, r *http.Request) {
 		return strings.HasSuffix(obj.Key, "default.pgo")
 	}
 
-	items, err := h.blobs.List(ctx, filter)
-	if err != nil {
-		api.ErrorResponse(ctx, w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	profiles := make([]Profile, 0)
+	for item, err := range h.blobs.List(ctx, filter) {
+		if err != nil {
+			api.ErrorResponse(ctx, w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
-	profiles := make([]Profile, len(items))
-	for i, item := range items {
-		profiles[i] = Profile{
+		profiles = append(profiles, Profile{
 			Key:          item.Key,
 			Size:         item.Size,
 			LastModified: item.LastModified,
-		}
+		})
 	}
 
 	api.Respond(ctx, w, http.StatusOK, ListResponse{Profiles: profiles})
+}
+
+type (
+	// The DeleteResponse type is the response given when a profile has been deleted.
+	DeleteResponse struct{}
+)
+
+// Delete handles an inbound HTTP request to delete the profile for an application. It will also delete any profiles
+// awaiting merge for the application.
+func (h *HTTPController) Delete(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	app := r.PathValue("app")
+
+	if !IsValidAppName(app) {
+		api.ErrorResponse(ctx, w, "invalid app name", http.StatusBadRequest)
+		return
+	}
+
+	exists, err := h.blobs.Exists(ctx, path.Join(app, "default.pgo"))
+	switch {
+	case err != nil:
+		api.ErrorResponse(ctx, w, err.Error(), http.StatusInternalServerError)
+		return
+	case !exists:
+		api.ErrorResponse(ctx, w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		return
+	}
+
+	filter := func(obj blob.Object) bool {
+		return strings.HasPrefix(obj.Key, app+"/")
+	}
+
+	for object, err := range h.blobs.List(ctx, filter) {
+		if err != nil {
+			api.ErrorResponse(ctx, w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		err = h.blobs.Delete(ctx, object.Key)
+		switch {
+		case errors.Is(err, blob.ErrNotExist):
+			continue
+		case err != nil:
+			api.ErrorResponse(ctx, w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	api.Respond(ctx, w, http.StatusOK, DeleteResponse{})
 }

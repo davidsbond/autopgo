@@ -267,7 +267,7 @@ The CLI provides a `download` command that can be used to download a merged prof
 
 #### Command
 
-To upload a profile, use the following command, specifying the application name as the only argument:
+To download a profile, use the following command, specifying the application name as the only argument:
 
 ```shell
 autopgo download hello-world
@@ -299,6 +299,28 @@ autopgo list
 #### Configuration
 
 The `list` command also accepts some command-line flags that may also be set via environment variables. They are
+described in the table below:
+
+|        Flag         | Environment Variable |         Default         | Description                                                                              |
+|:-------------------:|:--------------------:|:-----------------------:|:-----------------------------------------------------------------------------------------|
+| `--log-level`, `-l` | `AUTOPGO_LOG_LEVEL`  |         `info`          | Controls the verbosity of log output, valid values are `debug`, `info`, `warn` & `error` |
+|  `--api-url`, `-u`  |  `AUTOPGO_API_URL`   | `http://localhost:8080` | The base URL of the profile server where the specified profile will be sent              |
+
+### Delete
+
+The CLI provides a `delete` command that can be used to delete a merged profile from the [server](#server).
+
+#### Command
+
+To download a profile, use the following command, specifying the application name as the only argument:
+
+```shell
+autopgo delete hello-world
+```
+
+#### Configuration
+
+The `delete` command also accepts some command-line flags that may also be set via environment variables. They are
 described in the table below:
 
 |        Flag         | Environment Variable |         Default         | Description                                                                              |

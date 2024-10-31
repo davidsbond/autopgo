@@ -197,3 +197,62 @@ func TestClient_List(t *testing.T) {
 		})
 	}
 }
+
+func TestClient_Delete(t *testing.T) {
+	t.Parallel()
+
+	tt := []struct {
+		Name         string
+		App          string
+		Setup        func(t *testing.T) http.Handler
+		ExpectsError bool
+	}{
+		{
+			Name: "successful delete",
+			App:  "test",
+			Setup: func(t *testing.T) http.Handler {
+				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					assert.EqualValues(t, http.MethodDelete, r.Method)
+					assert.EqualValues(t, "/api/profile/test", r.URL.Path)
+				})
+			},
+		},
+		{
+			Name:         "profile not found",
+			App:          "test",
+			ExpectsError: true,
+			Setup: func(t *testing.T) http.Handler {
+				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					api.ErrorResponse(r.Context(), w, "uh oh", http.StatusNotFound)
+				})
+			},
+		},
+		{
+			Name:         "returns errors",
+			App:          "test",
+			ExpectsError: true,
+			Setup: func(t *testing.T) http.Handler {
+				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					api.ErrorResponse(r.Context(), w, "uh oh", http.StatusInternalServerError)
+				})
+			},
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.Name, func(t *testing.T) {
+			handler := tc.Setup(t)
+			server := httptest.NewServer(handler)
+			defer server.Close()
+
+			cl := client.New(server.URL)
+			err := cl.Delete(context.Background(), tc.App)
+			if tc.ExpectsError {
+				assert.Error(t, err)
+				return
+			}
+
+			assert.NoError(t, err)
+		})
+	}
+}

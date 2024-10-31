@@ -229,13 +229,13 @@ func TestHTTPController_List(t *testing.T) {
 			Setup: func(blobs *mocks.MockBlobRepository) {
 				blobs.EXPECT().
 					List(mock.Anything, mock.Anything).
-					Return([]blob.Object{
-						{
+					Return(func(yield func(blob.Object, error) bool) {
+						yield(blob.Object{
 							Key:          "test/default.pgo",
 							Size:         1000,
 							LastModified: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
-						},
-					}, nil)
+						}, nil)
+					})
 			},
 		},
 		{
@@ -245,7 +245,9 @@ func TestHTTPController_List(t *testing.T) {
 			Setup: func(blobs *mocks.MockBlobRepository) {
 				blobs.EXPECT().
 					List(mock.Anything, mock.Anything).
-					Return(nil, io.EOF)
+					Return(func(yield func(blob.Object, error) bool) {
+						yield(blob.Object{}, io.ErrClosedPipe)
+					})
 			},
 		},
 	}
@@ -274,6 +276,73 @@ func TestHTTPController_List(t *testing.T) {
 			var actual profile.ListResponse
 			require.NoError(t, decoder.Decode(&actual))
 			assert.EqualValues(t, tc.Expected, actual)
+		})
+	}
+}
+
+func TestHTTPController_Delete(t *testing.T) {
+	t.Parallel()
+
+	tt := []struct {
+		Name           string
+		App            string
+		ExpectedStatus int
+		ExpectsError   bool
+		Setup          func(blobs *mocks.MockBlobRepository)
+	}{
+		{
+			Name:           "success",
+			ExpectedStatus: http.StatusOK,
+			App:            "test",
+			Setup: func(blobs *mocks.MockBlobRepository) {
+				blobs.EXPECT().
+					Exists(mock.Anything, "test/default.pgo").
+					Return(true, nil)
+
+				blobs.EXPECT().
+					List(mock.Anything, mock.Anything).
+					Return(func(yield func(blob.Object, error) bool) {
+						yield(blob.Object{
+							Key:          "test/default.pgo",
+							Size:         1000,
+							LastModified: time.Now(),
+						}, nil)
+					})
+
+				blobs.EXPECT().
+					Delete(mock.Anything, "test/default.pgo").
+					Return(nil)
+			},
+		},
+		{
+			Name:           "invalid app name",
+			App:            "// invalid",
+			ExpectedStatus: http.StatusBadRequest,
+			ExpectsError:   true,
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.Name, func(t *testing.T) {
+			blobs := mocks.NewMockBlobRepository(t)
+			if tc.Setup != nil {
+				tc.Setup(blobs)
+			}
+
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodGet, "/", nil)
+			r.SetPathValue("app", tc.App)
+
+			profile.NewHTTPController(blobs, nil).Delete(w, r)
+
+			assert.Equal(t, tc.ExpectedStatus, w.Code)
+			decoder := json.NewDecoder(w.Body)
+			if tc.ExpectsError {
+				var apiErr api.Error
+				require.NoError(t, decoder.Decode(&apiErr))
+				assert.EqualValues(t, tc.ExpectedStatus, apiErr.Code)
+				return
+			}
 		})
 	}
 }
