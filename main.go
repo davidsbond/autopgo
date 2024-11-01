@@ -56,7 +56,7 @@ func main() {
 			"for semantics on individual cloud providers.\n\n" +
 			"All command-line flags can also be set via environment variables, to use environment variables simply set\n" +
 			"them using the following format:\n\n" +
-			"export autopgo_<flag-name>\n\n" +
+			"export AUTOPGO_<flag-name>\n\n" +
 			"Replacing <flag-name> with the name of the command-line flag replacing dashes for underscores and using all\n" +
 			"capital letters. For example, autopgo_LOG_LEVEL=error will map to the --log-level command-line flag.",
 		CompletionOptions: cobra.CompletionOptions{
