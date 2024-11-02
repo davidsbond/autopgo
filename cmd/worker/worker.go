@@ -8,6 +8,7 @@ import (
 	"github.com/davidsbond/autopgo/internal/blob"
 	"github.com/davidsbond/autopgo/internal/closers"
 	"github.com/davidsbond/autopgo/internal/event"
+	"github.com/davidsbond/autopgo/internal/logger"
 	"github.com/davidsbond/autopgo/internal/profile"
 	"github.com/davidsbond/autopgo/internal/server"
 )
@@ -65,6 +66,9 @@ func Command() *cobra.Command {
 			group.Go(func() error {
 				return server.Run(ctx, server.Config{
 					Port: port,
+					Middleware: []server.Middleware{
+						logger.Middleware(logger.FromContext(ctx)),
+					},
 				})
 			})
 

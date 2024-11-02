@@ -1,19 +1,14 @@
-{
-  "sampleSize": 10,
-  "profileDuration": 30,
-  "scrapeFrequency": 30,
-  "targets": [
-    {
-      "app": "autopgo",
-      "address": "http://localhost:8080/debug/pprof/profile"
-    },
-    {
-      "app": "autopgo",
-      "address": "http://localhost:8081/debug/pprof/profile"
-    },
-    {
-      "app": "autopgo",
-      "address": "http://localhost:8082/debug/pprof/profile"
-    }
-  ]
-}
+[
+  {
+    "address": "http://localhost:8080",
+    "path": "/debug/pprof/profile"
+  },
+  {
+    "address": "http://localhost:8081",
+    "path": "/debug/pprof/profile"
+  },
+  {
+    "address": "http://localhost:8082",
+    "path": "/debug/pprof/profile"
+  }
+]

@@ -27,20 +27,21 @@ func TestScraper_Scrape(t *testing.T) {
 			Duration: 5 * time.Second,
 			Config: profile.ScrapeConfig{
 				SampleSize:      3,
-				ProfileDuration: 30,
-				ScrapeFrequency: 1,
+				ProfileDuration: time.Second * 30,
+				App:             "test",
+				ScrapeFrequency: time.Second,
 				Targets: []profile.ScrapeTarget{
 					{
-						App:     "test",
-						Address: "http://localhost:8080/debug/pprof/profile",
+						Address: "http://localhost:8080",
+						Path:    "/debug/pprof/profile",
 					},
 					{
-						App:     "test-1",
-						Address: "http://localhost:8081/debug/pprof/profile",
+						Address: "http://localhost:8081",
+						Path:    "/debug/pprof/profile",
 					},
 					{
-						App:     "test-2",
-						Address: "http://localhost:8082/debug/pprof/profile",
+						Address: "http://localhost:8082",
+						Path:    "/debug/pprof/profile",
 					},
 				},
 			},
@@ -50,11 +51,11 @@ func TestScraper_Scrape(t *testing.T) {
 					Return(nil)
 
 				client.EXPECT().
-					ProfileAndUpload(mock.Anything, "test-1", "http://localhost:8081/debug/pprof/profile", time.Second*30).
+					ProfileAndUpload(mock.Anything, "test", "http://localhost:8081/debug/pprof/profile", time.Second*30).
 					Return(nil)
 
 				client.EXPECT().
-					ProfileAndUpload(mock.Anything, "test-2", "http://localhost:8082/debug/pprof/profile", time.Second*30).
+					ProfileAndUpload(mock.Anything, "test", "http://localhost:8082/debug/pprof/profile", time.Second*30).
 					Return(nil)
 			},
 		},
@@ -93,12 +94,13 @@ func TestScrapeConfig_Validate(t *testing.T) {
 			Name: "valid profile",
 			Config: profile.ScrapeConfig{
 				SampleSize:      10,
-				ProfileDuration: 10,
-				ScrapeFrequency: 30,
+				ProfileDuration: time.Second * 30,
+				ScrapeFrequency: time.Minute,
+				App:             "test",
 				Targets: []profile.ScrapeTarget{
 					{
-						App:     "test",
-						Address: "http://localhost:8080/debug/pprof/profile",
+						Address: "http://localhost:8080",
+						Path:    "/debug/pprof/profile",
 					},
 				},
 			},
@@ -108,8 +110,8 @@ func TestScrapeConfig_Validate(t *testing.T) {
 			ExpectsError: true,
 			Config: profile.ScrapeConfig{
 				SampleSize:      10,
-				ProfileDuration: 10,
-				ScrapeFrequency: 30,
+				ProfileDuration: time.Second * 30,
+				ScrapeFrequency: time.Minute,
 			},
 		},
 		{
@@ -117,11 +119,12 @@ func TestScrapeConfig_Validate(t *testing.T) {
 			ExpectsError: true,
 			Config: profile.ScrapeConfig{
 				SampleSize:      10,
-				ProfileDuration: 10,
+				ProfileDuration: time.Second * 30,
+				App:             "test",
 				Targets: []profile.ScrapeTarget{
 					{
-						App:     "test",
-						Address: "http://localhost:8080/debug/pprof/profile",
+						Address: "http://localhost:8080",
+						Path:    "/debug/pprof/profile",
 					},
 				},
 			},
@@ -131,11 +134,12 @@ func TestScrapeConfig_Validate(t *testing.T) {
 			ExpectsError: true,
 			Config: profile.ScrapeConfig{
 				SampleSize:      10,
-				ScrapeFrequency: 30,
+				ScrapeFrequency: time.Minute,
+				App:             "test",
 				Targets: []profile.ScrapeTarget{
 					{
-						App:     "test",
-						Address: "http://localhost:8080/debug/pprof/profile",
+						Address: "http://localhost:8080",
+						Path:    "/debug/pprof/profile",
 					},
 				},
 			},
@@ -144,26 +148,13 @@ func TestScrapeConfig_Validate(t *testing.T) {
 			Name:         "invalid sample size",
 			ExpectsError: true,
 			Config: profile.ScrapeConfig{
-				ProfileDuration: 10,
-				ScrapeFrequency: 30,
+				ProfileDuration: time.Second * 30,
+				ScrapeFrequency: time.Minute,
+				App:             "test",
 				Targets: []profile.ScrapeTarget{
 					{
-						App:     "test",
-						Address: "http://localhost:8080/debug/pprof/profile",
-					},
-				},
-			},
-		},
-		{
-			Name:         "target missing app",
-			ExpectsError: true,
-			Config: profile.ScrapeConfig{
-				SampleSize:      10,
-				ProfileDuration: 10,
-				ScrapeFrequency: 30,
-				Targets: []profile.ScrapeTarget{
-					{
-						Address: "http://localhost:8080/debug/pprof/profile",
+						Address: "http://localhost:8080",
+						Path:    "/debug/pprof/profile",
 					},
 				},
 			},
@@ -173,12 +164,13 @@ func TestScrapeConfig_Validate(t *testing.T) {
 			ExpectsError: true,
 			Config: profile.ScrapeConfig{
 				SampleSize:      10,
-				ProfileDuration: 10,
-				ScrapeFrequency: 30,
+				ProfileDuration: time.Second * 30,
+				ScrapeFrequency: time.Minute,
+				App:             "_/@~",
 				Targets: []profile.ScrapeTarget{
 					{
-						App:     "_/@~",
-						Address: "http://localhost:8080/debug/pprof/profile",
+						Address: "http://localhost:8080",
+						Path:    "/debug/pprof/profile",
 					},
 				},
 			},
@@ -188,12 +180,11 @@ func TestScrapeConfig_Validate(t *testing.T) {
 			ExpectsError: true,
 			Config: profile.ScrapeConfig{
 				SampleSize:      10,
-				ProfileDuration: 10,
-				ScrapeFrequency: 30,
+				ProfileDuration: time.Second * 30,
+				ScrapeFrequency: time.Minute,
+				App:             "test",
 				Targets: []profile.ScrapeTarget{
-					{
-						App: "test",
-					},
+					{},
 				},
 			},
 		},
