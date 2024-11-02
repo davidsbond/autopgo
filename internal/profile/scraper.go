@@ -2,11 +2,14 @@ package profile
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"iter"
 	"log/slog"
 	"math/rand"
+	"net/url"
 	"slices"
 	"sync"
 	"time"
@@ -19,27 +22,31 @@ type (
 	// specified targets.
 	ScrapeConfig struct {
 		// How many profiles to obtain after the ProfileDuration has passed.
-		SampleSize int `json:"sampleSize"`
+		SampleSize uint
 		// How long targets should be profiled for, in seconds.
-		ProfileDuration int `json:"profileDuration"`
+		ProfileDuration time.Duration
 		// How frequently profiles are sampled, in seconds.
-		ScrapeFrequency int `json:"scrapeFrequency"`
+		ScrapeFrequency time.Duration
+		// The application this scraper instance is collecting profiles for.
+		App string
 		// Endpoints that can be called to obtain profiles.
-		Targets []ScrapeTarget `json:"targets"`
+		Targets []ScrapeTarget
 	}
 
 	// The ScrapeTarget type describes a single pprof endpoint that can be called to obtain a profile.
 	ScrapeTarget struct {
-		// The application associated with the profile.
-		App string `json:"app"`
-		// The full target address, including the path for pprof.
+		// The target address, should include scheme, host & port.
 		Address string `json:"address"`
+		// The path to the pprof profile endpoint, including leading slash. Defaults to /debug/pprof/profile if
+		// unset.
+		Path string `json:"path"`
 	}
 
 	// The Scraper type is used to perform periodic sampling of pprof profiles given a selection of valid
 	// targets. These profiles are then forwarded to the configured profile server.
 	Scraper struct {
-		sampleSize      int
+		app             string
+		sampleSize      uint
 		scrapeFrequency time.Duration
 		profileDuration time.Duration
 		targets         []ScrapeTarget
@@ -54,10 +61,11 @@ func NewScraper(client Client, config ScrapeConfig) *Scraper {
 	return &Scraper{
 		sampleSize:      config.SampleSize,
 		targets:         config.Targets,
-		profileDuration: time.Duration(config.ProfileDuration) * time.Second,
-		scrapeFrequency: time.Duration(config.ScrapeFrequency) * time.Second,
+		profileDuration: config.ProfileDuration,
+		scrapeFrequency: config.ScrapeFrequency,
 		rand:            rand.New(rand.NewSource(time.Now().UnixNano())),
 		client:          client,
+		app:             config.App,
 	}
 }
 
@@ -84,7 +92,7 @@ func (s *Scraper) Scrape(ctx context.Context) error {
 }
 
 func (s *Scraper) sample(ctx context.Context) iter.Seq[ScrapeTarget] {
-	size := s.sampleSize
+	size := int(s.sampleSize)
 	targets := slices.Clone(s.targets)
 
 	if size > len(targets) {
@@ -113,11 +121,23 @@ func (s *Scraper) forwardProfile(ctx context.Context, group *sync.WaitGroup, tar
 
 	log := logger.FromContext(ctx).With(
 		slog.String("target.address", target.Address),
-		slog.String("target.app", target.App),
+		slog.String("target.app", s.app),
 	)
 
+	u, err := url.Parse(target.Address)
+	if err != nil {
+		log.With(slog.String("error", err.Error())).
+			ErrorContext(ctx, "failed to parse target address")
+		return
+	}
+
+	u.Path = "/debug/pprof/profile"
+	if target.Path != "" {
+		u.Path = target.Path
+	}
+
 	log.DebugContext(ctx, "profiling target")
-	if err := s.client.ProfileAndUpload(ctx, target.App, target.Address, s.profileDuration); err != nil {
+	if err = s.client.ProfileAndUpload(ctx, s.app, u.String(), s.profileDuration); err != nil {
 		log.With(slog.String("error", err.Error())).
 			ErrorContext(ctx, "failed to profile target")
 		return
@@ -138,21 +158,29 @@ func (cfg ScrapeConfig) Validate() error {
 		return errors.New("profile duration must be greater than 0")
 	}
 
+	if !IsValidAppName(cfg.App) {
+		return errors.New("application name is invalid")
+	}
+
 	if len(cfg.Targets) == 0 {
 		return errors.New("at least one target must be set")
 	}
 
 	for i, target := range cfg.Targets {
-		if target.App == "" {
-			return fmt.Errorf("targets[%d].app must be set", i)
-		}
 		if target.Address == "" {
 			return fmt.Errorf("targets[%d].address must be set", i)
-		}
-		if !IsValidAppName(target.App) {
-			return fmt.Errorf("targets[%d].app is invalid", i)
 		}
 	}
 
 	return nil
+}
+
+func ParseScrapeTargets(r io.Reader) ([]ScrapeTarget, error) {
+	var targets []ScrapeTarget
+
+	if err := json.NewDecoder(r).Decode(&targets); err != nil {
+		return nil, err
+	}
+
+	return targets, nil
 }

@@ -37,45 +37,40 @@ autopgo scrape config.json
 #### Configuration
 
 The `scrape` command accepts a single argument that is a path to a JSON-encoded configuration file that describes the
-sampling behaviour and the targets available to be scraped. Below is an example configuration:
+targets available to be scraped. Below is an example configuration:
 
 ```json5
-{
-  // The maximum number of targets to sample at once.
-  "sampleSize": 3,
-  // How long targets should be profiled for, in seconds.
-  "profileDuration": 30,
-  // How frequently targets should be profiled, in seconds.
-  "scrapeFrequency": 300,
-  // Endpoints that will profile applications.
-  "targets": [
-    {
-      // The application the profile will belong to.
-      "app": "example-app",
-      // The full address pointing to the target's profiling endpoint.
-      "address": "http://localhost:5000/debug/pprof/profile"
-    }
-  ]
-}
+[
+  {
+    // The scheme, host & port combination of the target.
+    "address": "http://localhost:5000",
+    // The path to the pprof profile endpoint, defaults to /debug/pprof/profile.
+    "path": "/debug/pprof/profile"
+  }
+]
 ```
 
 The `scrape` command also accepts some command-line flags that may also be set via environment variables. They are
 described in the table below:
 
-|        Flag         | Environment Variable |         Default         | Description                                                                              |
-|:-------------------:|:--------------------:|:-----------------------:|:-----------------------------------------------------------------------------------------|
-| `--log-level`, `-l` | `AUTOPGO_LOG_LEVEL`  |         `info`          | Controls the verbosity of log output, valid values are `debug`, `info`, `warn` & `error` |
-|  `--api-url`, `-u`  |  `AUTOPGO_API_URL`   | `http://localhost:8080` | The base URL of the profile server where scraped profiles will be sent                   |
-|   `--port`, `-p`    |    `AUTOPGO_PORT`    |         `8080`          | Specifies the port to use for HTTP traffic                                               |
+|         Flag          | Environment Variable  |         Default         | Description                                                                              |
+|:---------------------:|:---------------------:|:-----------------------:|:-----------------------------------------------------------------------------------------|
+|  `--log-level`, `-l`  |  `AUTOPGO_LOG_LEVEL`  |         `info`          | Controls the verbosity of log output, valid values are `debug`, `info`, `warn` & `error` |
+|   `--api-url`, `-u`   |   `AUTOPGO_API_URL`   | `http://localhost:8080` | The base URL of the profile server where scraped profiles will be sent                   |
+|    `--port`, `-p`     |    `AUTOPGO_PORT`     |         `8080`          | Specifies the port to use for HTTP traffic                                               |
+| `--sample-size`, `-s` | `AUTOPGO_SAMPLE_SIZE` |          None           | Specifies the maximum number of targets to profile concurrently                          |
+|     `--app`, `-a`     |     `AUTOPGO_APP`     |          None           | Specifies the the application name that profiles will be uploaded for                    |
+|  `--frequency`, `-f`  |  `AUTOPGO_FREQUENCY`  |          `60s`          | Specifies the interval between profiling runs                                            |
+|  `--duration`, `-d`   |  `AUTOPGO_DURATION`   |          `30s`          | Specifies the amount of time a target will be profiled for                               |
 
 #### Sampling
 
-The sampling behaviour of the scraper is fairly simple. At the interval defined in the `scrapeFrequency` field, a number
-of randomly selected targets (up to the maximum defined in the `sampleSize` field) have their profiling endpoint called
-for the duration defined in the `profileDuration` field.
+The sampling behaviour of the scraper is fairly simple. At the interval defined by the `--frequency` flag, a number
+of randomly selected targets (up to the maximum defined in the `--sample-size` flag) have their profiling endpoint
+called for the duration defined in the `--duration` flag.
 
 These profiles are taken concurrently and streamed to the upstream profile server, whose base URL is defined via the
-`apiUrl` field.
+`--api-url` flag.
 
 ### Server
 

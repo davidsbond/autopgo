@@ -12,3 +12,5 @@ export AUTOPGO_EVENT_READER_URL="nats://profile?natsv2=true&queue=worker"
 
 export AUTOPGO_LOG_LEVEL=debug
 export AUTOPGO_API_URL="http://localhost:8080"
+export AUTOPGO_APP=autopgo
+export AUTOPGO_SAMPLE_SIZE=10
