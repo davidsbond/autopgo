@@ -5,15 +5,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"iter"
 	"log/slog"
 	"math/rand"
 	"net/url"
+	"os"
 	"slices"
 	"sync"
 	"time"
 
+	"github.com/davidsbond/autopgo/internal/closers"
 	"github.com/davidsbond/autopgo/internal/logger"
 )
 
@@ -175,10 +176,17 @@ func (cfg ScrapeConfig) Validate() error {
 	return nil
 }
 
-func ParseScrapeTargets(r io.Reader) ([]ScrapeTarget, error) {
-	var targets []ScrapeTarget
+// LoadScrapeConfiguration attempts to parse the file at the specified location and decode it into an array of targets
+// that can be scraped. The file is expected to be in JSON encoding.
+func LoadScrapeConfiguration(ctx context.Context, location string) ([]ScrapeTarget, error) {
+	f, err := os.Open(location)
+	if err != nil {
+		return nil, err
+	}
+	defer closers.Close(ctx, f)
 
-	if err := json.NewDecoder(r).Decode(&targets); err != nil {
+	var targets []ScrapeTarget
+	if err = json.NewDecoder(f).Decode(&targets); err != nil {
 		return nil, err
 	}
 

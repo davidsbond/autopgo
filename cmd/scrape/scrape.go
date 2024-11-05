@@ -2,13 +2,11 @@
 package scrape
 
 import (
-	"os"
 	"time"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/davidsbond/autopgo/internal/closers"
 	"github.com/davidsbond/autopgo/internal/logger"
 	"github.com/davidsbond/autopgo/internal/profile"
 	"github.com/davidsbond/autopgo/internal/server"
@@ -39,14 +37,7 @@ func Command() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
-			configLocation := args[0]
-			f, err := os.Open(configLocation)
-			if err != nil {
-				return err
-			}
-			defer closers.Close(ctx, f)
-
-			targets, err := profile.ParseScrapeTargets(f)
+			targets, err := profile.LoadScrapeConfiguration(ctx, args[0])
 			if err != nil {
 				return err
 			}
