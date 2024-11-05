@@ -4,7 +4,6 @@ package clean
 import (
 	"errors"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -37,15 +36,34 @@ func Command() *cobra.Command {
 				return errors.New("one of --older-than or --larger-than must be set")
 			}
 
-			cleaned, err := client.New(apiURL).Clean(ctx, olderThan, largerThan)
+			cl := client.New(apiURL)
+
+			profiles, err := cl.List(ctx)
 			if err != nil {
 				return err
 			}
 
-			for _, profile := range cleaned {
-				if _, err = fmt.Fprintf(os.Stdout, "Deleted profile '%s'\n", profile); err != nil {
+			now := time.Now()
+			for _, profile := range profiles {
+				var remove bool
+
+				if largerThan != 0 && profile.Size > largerThan {
+					remove = true
+				}
+
+				if olderThan != 0 && profile.LastModified.Add(olderThan).Before(now) {
+					remove = true
+				}
+
+				if !remove {
+					continue
+				}
+
+				if err = cl.Delete(ctx, profile.Key); err != nil {
 					return err
 				}
+
+				fmt.Printf("Deleted profile '%s'\n", profile.Key)
 			}
 
 			return nil

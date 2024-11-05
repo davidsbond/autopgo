@@ -2,7 +2,6 @@ package profile_test
 
 import (
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 
@@ -73,94 +72,6 @@ func TestIsApplication(t *testing.T) {
 	for _, tc := range tt {
 		t.Run(tc.Name, func(t *testing.T) {
 			filter := profile.IsApplication(tc.App)
-			actual := filter(tc.Object)
-			assert.EqualValues(t, tc.Expected, actual)
-		})
-	}
-}
-
-func TestIsOlderThan(t *testing.T) {
-	t.Parallel()
-
-	tt := []struct {
-		Name     string
-		Duration time.Duration
-		Object   blob.Object
-		Expected bool
-	}{
-		{
-			Name:     "should return true if the object is old enough",
-			Expected: true,
-			Duration: time.Minute,
-			Object: blob.Object{
-				LastModified: time.Now().Add(-time.Hour),
-			},
-		},
-		{
-			Name:     "should return false if the object is not old enough",
-			Expected: false,
-			Duration: time.Hour,
-			Object: blob.Object{
-				LastModified: time.Now(),
-			},
-		},
-		{
-			Name:     "should return false for a zero duration",
-			Expected: false,
-			Duration: 0,
-			Object: blob.Object{
-				LastModified: time.Now(),
-			},
-		},
-	}
-
-	for _, tc := range tt {
-		t.Run(tc.Name, func(t *testing.T) {
-			filter := profile.IsOlderThan(tc.Duration)
-			actual := filter(tc.Object)
-			assert.EqualValues(t, tc.Expected, actual)
-		})
-	}
-}
-
-func TestIsLargerThan(t *testing.T) {
-	t.Parallel()
-
-	tt := []struct {
-		Name     string
-		Size     int64
-		Object   blob.Object
-		Expected bool
-	}{
-		{
-			Name:     "should return true if the object is large enough",
-			Expected: true,
-			Size:     10,
-			Object: blob.Object{
-				Size: 20,
-			},
-		},
-		{
-			Name:     "should return false if the object is not large enough",
-			Expected: false,
-			Size:     10,
-			Object: blob.Object{
-				Size: 5,
-			},
-		},
-		{
-			Name:     "should return false for a zero size",
-			Expected: false,
-			Size:     0,
-			Object: blob.Object{
-				Size: 10,
-			},
-		},
-	}
-
-	for _, tc := range tt {
-		t.Run(tc.Name, func(t *testing.T) {
-			filter := profile.IsLargerThan(tc.Size)
 			actual := filter(tc.Object)
 			assert.EqualValues(t, tc.Expected, actual)
 		})
