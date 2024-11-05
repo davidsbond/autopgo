@@ -3,6 +3,7 @@ package client_test
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -253,6 +254,60 @@ func TestClient_Delete(t *testing.T) {
 			}
 
 			assert.NoError(t, err)
+		})
+	}
+}
+
+func TestClient_Clean(t *testing.T) {
+	t.Parallel()
+
+	tt := []struct {
+		Name         string
+		LargerThan   int64
+		OlderThan    time.Duration
+		Setup        func(t *testing.T) http.Handler
+		ExpectsError bool
+		Expected     []string
+	}{
+		{
+			Name:       "successful clean",
+			LargerThan: 1000,
+			OlderThan:  time.Hour,
+			Expected:   []string{"test"},
+			Setup: func(t *testing.T) http.Handler {
+				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					assert.EqualValues(t, http.MethodPost, r.Method)
+					assert.EqualValues(t, "/api/clean", r.URL.Path)
+
+					var body profile.CleanRequest
+					require.NoError(t, json.NewDecoder(r.Body).Decode(&body))
+
+					assert.EqualValues(t, 1000, body.LargerThan)
+					assert.EqualValues(t, time.Hour, body.OlderThan)
+
+					require.NoError(t, json.NewEncoder(w).Encode(profile.CleanResponse{
+						Cleaned: []string{"test"},
+					}))
+				})
+			},
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.Name, func(t *testing.T) {
+			handler := tc.Setup(t)
+			server := httptest.NewServer(handler)
+			defer server.Close()
+
+			cl := client.New(server.URL)
+			actual, err := cl.Clean(context.Background(), tc.OlderThan, tc.LargerThan)
+			if tc.ExpectsError {
+				assert.Error(t, err)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.EqualValues(t, tc.Expected, actual)
 		})
 	}
 }
