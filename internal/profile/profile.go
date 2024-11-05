@@ -128,30 +128,3 @@ func IsApplication(app string) blob.Filter {
 		return strings.HasPrefix(obj.Key, app+"/")
 	}
 }
-
-// IsLargerThan returns a blob.Filter that returns true for any object whose size is larger than the one provided.
-// The size is a byte value. If size is zero then this filter does nothing.
-func IsLargerThan(size int64) blob.Filter {
-	return func(obj blob.Object) bool {
-		if size <= 0 {
-			return false
-		}
-
-		return obj.Size > size
-	}
-}
-
-// IsOlderThan returns a blob.Filter that returns true for any object whose last modified time is older than the
-// specified duration relative to the time this function is called. If the duration is zero then this filter does
-// nothing.
-func IsOlderThan(duration time.Duration) blob.Filter {
-	now := time.Now()
-
-	return func(obj blob.Object) bool {
-		if duration <= 0 {
-			return false
-		}
-
-		return obj.LastModified.Add(duration).Before(now)
-	}
-}

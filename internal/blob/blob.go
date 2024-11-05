@@ -149,28 +149,3 @@ func (b *Bucket) List(ctx context.Context, filter Filter) iter.Seq2[Object, erro
 func (b *Bucket) Exists(ctx context.Context, path string) (bool, error) {
 	return b.blob.Exists(ctx, path)
 }
-
-// Any returns a Filter that requires at least one of the provided Filter functions to return true for the
-// Object to be selected.
-func Any(filters ...Filter) Filter {
-	return func(obj Object) bool {
-		for _, f := range filters {
-			if f(obj) {
-				return true
-			}
-		}
-
-		return false
-	}
-}
-
-// All returns a Filter that requires all provided Filter functions to return true for the Object to be selected.
-func All(filters ...Filter) Filter {
-	return func(obj Object) bool {
-		v := true
-		for _, f := range filters {
-			v = v && f(obj)
-		}
-		return v
-	}
-}

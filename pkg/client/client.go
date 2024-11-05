@@ -1,7 +1,6 @@
 package client
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -205,54 +204,6 @@ func (c *Client) Delete(ctx context.Context, app string) error {
 	}
 
 	return nil
-}
-
-// Clean deletes all profiles that are larger than a specified size or have not been modified for longer than the given
-// duration.
-func (c *Client) Clean(ctx context.Context, olderThan time.Duration, largerThan int64) ([]string, error) {
-	u, err := url.Parse(c.baseURL)
-	if err != nil {
-		return nil, err
-	}
-
-	u.Path = "/api/clean"
-
-	payload := profile.CleanRequest{
-		OlderThan:  olderThan,
-		LargerThan: largerThan,
-	}
-
-	buffer := bytes.NewBuffer(nil)
-	if err = json.NewEncoder(buffer).Encode(&payload); err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u.String(), buffer)
-	if err != nil {
-		return nil, err
-	}
-
-	logger.FromContext(ctx).With(
-		slog.String("http.url", req.URL.String()),
-		slog.String("http.method", req.Method),
-	).DebugContext(ctx, "performing HTTP request")
-
-	resp, err := c.http.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer closers.Close(ctx, resp.Body)
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, bodyToError(resp.Body)
-	}
-
-	var clean profile.CleanResponse
-	if err = json.NewDecoder(resp.Body).Decode(&clean); err != nil {
-		return nil, err
-	}
-
-	return clean.Cleaned, nil
 }
 
 func bodyToError(body io.Reader) error {
