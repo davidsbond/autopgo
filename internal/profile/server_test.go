@@ -320,6 +320,17 @@ func TestHTTPController_Delete(t *testing.T) {
 			ExpectedStatus: http.StatusBadRequest,
 			ExpectsError:   true,
 		},
+		{
+			Name:           "does not exist",
+			App:            "test",
+			ExpectedStatus: http.StatusNotFound,
+			ExpectsError:   true,
+			Setup: func(blobs *mocks.MockBlobRepository) {
+				blobs.EXPECT().
+					Exists(mock.Anything, "test/default.pgo").
+					Return(false, nil)
+			},
+		},
 	}
 
 	for _, tc := range tt {
@@ -343,6 +354,74 @@ func TestHTTPController_Delete(t *testing.T) {
 				assert.EqualValues(t, tc.ExpectedStatus, apiErr.Code)
 				return
 			}
+		})
+	}
+}
+
+func TestParseScrapeTargets(t *testing.T) {
+	t.Parallel()
+
+	tt := []struct {
+		Name           string
+		Request        profile.CleanRequest
+		Expected       profile.CleanResponse
+		ExpectedStatus int
+		ExpectsError   bool
+		Setup          func(blobs *mocks.MockBlobRepository)
+	}{
+		{
+			Name:           "success",
+			ExpectedStatus: http.StatusOK,
+			Request: profile.CleanRequest{
+				OlderThan:  time.Minute,
+				LargerThan: 100,
+			},
+			Expected: profile.CleanResponse{
+				Cleaned: []string{"test"},
+			},
+			Setup: func(blobs *mocks.MockBlobRepository) {
+				blobs.EXPECT().
+					List(mock.Anything, mock.Anything).
+					Return(func(yield func(blob.Object, error) bool) {
+						yield(blob.Object{
+							Key:          "test/default.pgo",
+							Size:         1000,
+							LastModified: time.Now().Add(-time.Hour),
+						}, nil)
+					})
+
+				blobs.EXPECT().
+					Delete(mock.Anything, "test/default.pgo").
+					Return(nil)
+			},
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.Name, func(t *testing.T) {
+			blobs := mocks.NewMockBlobRepository(t)
+			if tc.Setup != nil {
+				tc.Setup(blobs)
+			}
+
+			body := mustMarshal(t, tc.Request)
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(body))
+
+			profile.NewHTTPController(blobs, nil).Clean(w, r)
+
+			assert.Equal(t, tc.ExpectedStatus, w.Code)
+			decoder := json.NewDecoder(w.Body)
+			if tc.ExpectsError {
+				var apiErr api.Error
+				require.NoError(t, decoder.Decode(&apiErr))
+				assert.EqualValues(t, tc.ExpectedStatus, apiErr.Code)
+				return
+			}
+
+			var actual profile.CleanResponse
+			require.NoError(t, decoder.Decode(&actual))
+			assert.EqualValues(t, tc.Expected, actual)
 		})
 	}
 }

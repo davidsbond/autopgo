@@ -301,3 +301,28 @@ described in the table below:
 |:-------------------:|:--------------------:|:-----------------------:|:-----------------------------------------------------------------------------------------|
 | `--log-level`, `-l` | `AUTOPGO_LOG_LEVEL`  |         `info`          | Controls the verbosity of log output, valid values are `debug`, `info`, `warn` & `error` |
 |  `--api-url`, `-u`  |  `AUTOPGO_API_URL`   | `http://localhost:8080` | The base URL of the profile server where the specified profile will be sent              |
+
+### Clean
+
+The CLI provides a `clean` command that can be used to remove profiles larger than a specified size or that have not
+been updated for a specified duration.
+
+#### Command
+
+To perform a clean, use the following command, specifying either the `--older-than` or `--larger-than` flags (or both).
+
+```shell
+autopgo clean --older-than 24h --larger-than 10240
+```
+
+#### Configuration
+
+The `clean` command accepts command-line flags that may also be set via environment variables. They are described in the
+table below:
+
+|         Flag          | Environment Variable  |         Default         | Description                                                                              |
+|:---------------------:|:---------------------:|:-----------------------:|:-----------------------------------------------------------------------------------------|
+|  `--log-level`, `-l`  |  `AUTOPGO_LOG_LEVEL`  |         `info`          | Controls the verbosity of log output, valid values are `debug`, `info`, `warn` & `error` |
+|   `--api-url`, `-u`   |   `AUTOPGO_API_URL`   | `http://localhost:8080` | The base URL of the profile server where the specified profile will be sent              |
+| `--older-than`, `-d`  | `AUTOPGO_OLDER_THAN`  |          None           | How long a profile must not have been updated for to be eligible for cleaning            |
+| `--larger-than`, `-s` | `AUTOPGO_LARGER_THAN` |          None           | The minimum size (in bytes) a profile must be to be eligible for cleaning                |

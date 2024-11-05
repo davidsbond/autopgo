@@ -24,8 +24,8 @@ type (
 		blob *blob.Bucket
 	}
 
-	// The ListFilter function allows callers of Bucket.List to programmatically filter results.
-	ListFilter func(obj Object) bool
+	// The Filter function allows callers of Bucket.List to programmatically filter results.
+	Filter func(obj Object) bool
 
 	// The Object type contains metadata on an object within the blob store.
 	Object struct {
@@ -106,10 +106,10 @@ func (b *Bucket) Delete(ctx context.Context, path string) error {
 	}
 }
 
-// List objects within the bucket that match the given ListFilter. Provide a nil ListFilter to return all objects. This
+// List objects within the bucket that match the given Filter. Provide a nil Filter to return all objects. This
 // method returns an iterator so is used with a range statement. The second range parameter is an error that must be
 // checked on each iteration.
-func (b *Bucket) List(ctx context.Context, filter ListFilter) iter.Seq2[Object, error] {
+func (b *Bucket) List(ctx context.Context, filter Filter) iter.Seq2[Object, error] {
 	iterator := b.blob.List(&blob.ListOptions{})
 
 	return func(yield func(Object, error) bool) {
@@ -148,4 +148,29 @@ func (b *Bucket) List(ctx context.Context, filter ListFilter) iter.Seq2[Object, 
 // Exists returns true if an object exists at the given path.
 func (b *Bucket) Exists(ctx context.Context, path string) (bool, error) {
 	return b.blob.Exists(ctx, path)
+}
+
+// Any returns a Filter that requires at least one of the provided Filter functions to return true for the
+// Object to be selected.
+func Any(filters ...Filter) Filter {
+	return func(obj Object) bool {
+		for _, f := range filters {
+			if f(obj) {
+				return true
+			}
+		}
+
+		return false
+	}
+}
+
+// All returns a Filter that requires all provided Filter functions to return true for the Object to be selected.
+func All(filters ...Filter) Filter {
+	return func(obj Object) bool {
+		v := true
+		for _, f := range filters {
+			v = v && f(obj)
+		}
+		return v
+	}
 }

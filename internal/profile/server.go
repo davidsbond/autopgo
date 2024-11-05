@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"path"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/google/pprof/profile"
@@ -40,6 +39,7 @@ func (h *HTTPController) Register(m *http.ServeMux) {
 	m.HandleFunc("GET /api/profile/{app}", h.Download)
 	m.HandleFunc("GET /api/profile", h.List)
 	m.HandleFunc("DELETE /api/profile/{app}", h.Delete)
+	m.HandleFunc("POST /api/clean", h.Clean)
 }
 
 type (
@@ -149,12 +149,8 @@ type (
 func (h *HTTPController) List(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	filter := func(obj blob.Object) bool {
-		return strings.HasSuffix(obj.Key, "default.pgo")
-	}
-
 	profiles := make([]Profile, 0)
-	for item, err := range h.blobs.List(ctx, filter) {
+	for item, err := range h.blobs.List(ctx, IsMergedProfile()) {
 		if err != nil {
 			api.ErrorResponse(ctx, w, err.Error(), http.StatusInternalServerError)
 			return
@@ -196,11 +192,7 @@ func (h *HTTPController) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	filter := func(obj blob.Object) bool {
-		return strings.HasPrefix(obj.Key, app+"/")
-	}
-
-	for object, err := range h.blobs.List(ctx, filter) {
+	for object, err := range h.blobs.List(ctx, IsApplication(app)) {
 		if err != nil {
 			api.ErrorResponse(ctx, w, err.Error(), http.StatusInternalServerError)
 			return
@@ -217,4 +209,61 @@ func (h *HTTPController) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	api.Respond(ctx, w, http.StatusOK, DeleteResponse{})
+}
+
+type (
+	// The CleanRequest type contains fields that describe what kinds of profiles should be cleaned.
+	CleanRequest struct {
+		// Specifies a size, in bytes, that profiles must be larger than to be deleted.
+		LargerThan int64 `json:"largerThan"`
+		// Specifies a duration since the profile's last modified time.
+		OlderThan time.Duration `json:"olderThan"`
+	}
+
+	// The CleanResponse type is the response given when cleaning has been performed.
+	CleanResponse struct {
+		// The names of any profiles that have been deleted.
+		Cleaned []string `json:"cleaned"`
+	}
+)
+
+// Clean handles an inbound HTTP request to delete profiles that have reached a certain size or have not been uploaded
+// after a specified duration. Returns a list of any profiles deleted.
+func (h *HTTPController) Clean(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	request, err := api.Decode[CleanRequest](r.Body)
+	if err != nil {
+		api.ErrorResponse(ctx, w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	filter := blob.All(
+		IsMergedProfile(),
+		blob.Any(
+			IsLargerThan(request.LargerThan),
+			IsOlderThan(request.OlderThan),
+		),
+	)
+
+	cleaned := make([]string, 0)
+	for item, err := range h.blobs.List(ctx, filter) {
+		if err != nil {
+			api.ErrorResponse(ctx, w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		err = h.blobs.Delete(ctx, item.Key)
+		switch {
+		case errors.Is(err, blob.ErrNotExist):
+			continue
+		case err != nil:
+			api.ErrorResponse(ctx, w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		cleaned = append(cleaned, path.Dir(item.Key))
+	}
+
+	api.Respond(ctx, w, http.StatusOK, CleanResponse{Cleaned: cleaned})
 }

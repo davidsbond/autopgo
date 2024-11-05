@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 
@@ -45,4 +46,13 @@ func Respond(ctx context.Context, w http.ResponseWriter, code int, body any) {
 			With(slog.String("error", err.Error())).
 			ErrorContext(ctx, "failed to write response")
 	}
+}
+
+// Decode the contents of the io.Reader into a new instance of type T. Expects a JSON-encoded object.
+func Decode[T any](r io.Reader) (T, error) {
+	var t T
+	if err := json.NewDecoder(r).Decode(&t); err != nil {
+		return t, err
+	}
+	return t, nil
 }

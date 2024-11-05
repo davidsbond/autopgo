@@ -132,7 +132,7 @@ func (_c *MockBlobRepository_Exists_Call) RunAndReturn(run func(context.Context,
 }
 
 // List provides a mock function with given fields: ctx, filter
-func (_m *MockBlobRepository) List(ctx context.Context, filter blob.ListFilter) iter.Seq2[blob.Object, error] {
+func (_m *MockBlobRepository) List(ctx context.Context, filter blob.Filter) iter.Seq2[blob.Object, error] {
 	ret := _m.Called(ctx, filter)
 
 	if len(ret) == 0 {
@@ -140,7 +140,7 @@ func (_m *MockBlobRepository) List(ctx context.Context, filter blob.ListFilter) 
 	}
 
 	var r0 iter.Seq2[blob.Object, error]
-	if rf, ok := ret.Get(0).(func(context.Context, blob.ListFilter) iter.Seq2[blob.Object, error]); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, blob.Filter) iter.Seq2[blob.Object, error]); ok {
 		r0 = rf(ctx, filter)
 	} else {
 		if ret.Get(0) != nil {
@@ -158,14 +158,14 @@ type MockBlobRepository_List_Call struct {
 
 // List is a helper method to define mock.On call
 //   - ctx context.Context
-//   - filter blob.ListFilter
+//   - filter blob.Filter
 func (_e *MockBlobRepository_Expecter) List(ctx interface{}, filter interface{}) *MockBlobRepository_List_Call {
 	return &MockBlobRepository_List_Call{Call: _e.mock.On("List", ctx, filter)}
 }
 
-func (_c *MockBlobRepository_List_Call) Run(run func(ctx context.Context, filter blob.ListFilter)) *MockBlobRepository_List_Call {
+func (_c *MockBlobRepository_List_Call) Run(run func(ctx context.Context, filter blob.Filter)) *MockBlobRepository_List_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(blob.ListFilter))
+		run(args[0].(context.Context), args[1].(blob.Filter))
 	})
 	return _c
 }
@@ -175,7 +175,7 @@ func (_c *MockBlobRepository_List_Call) Return(_a0 iter.Seq2[blob.Object, error]
 	return _c
 }
 
-func (_c *MockBlobRepository_List_Call) RunAndReturn(run func(context.Context, blob.ListFilter) iter.Seq2[blob.Object, error]) *MockBlobRepository_List_Call {
+func (_c *MockBlobRepository_List_Call) RunAndReturn(run func(context.Context, blob.Filter) iter.Seq2[blob.Object, error]) *MockBlobRepository_List_Call {
 	_c.Call.Return(run)
 	return _c
 }
