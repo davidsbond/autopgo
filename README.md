@@ -130,6 +130,44 @@ described in the table below:
 | `--event-reader-url` | `AUTOPGO_EVENT_READER_URL` |  None   | Specifies the event bus to use for consuming profile events. See the documentation on [URLs](#url-configuration) for more details                |
 |  `--blob-store-url`  |  `AUTOPGO_BLOB_STORE_URL`  |  None   | Specifies the blob storage provider to use for reading & writing profiles.  See the documentation on [URLs](#url-configuration) for more details |
 |    `--port`, `-p`    |       `AUTOPGO_PORT`       | `8080`  | Specifies the port to use for HTTP traffic                                                                                                       |
+|      `--prune`       |      `AUTOPGO_PRUNE`       |  None   | Specifies the location of the configuration file for [profile pruning](#pruning)                                                                 |
+
+#### Pruning
+
+The `worker` supports pruning pprof profiles via a configuration file allowing multiple regular expressions per
+application to determine frames to drop and keep. This may be useful for managing the size of profiles as typically
+profiles will increase in size over time and eliminating code paths from profiles you are not interested in optimising
+can help keep those profile sizes low.
+
+Larger profiles will typically cause longer build times, so pruning is something to consider as profiles grow.
+
+To utilise pruning, provide the `--prune` flag with a location to a JSON file that describes the regular expressions to
+use. An example configuration is below:
+
+```json5
+[
+  {
+    // The name of the application whose profile you want to prune, this should match a value provided to a scraper via
+    // the --app flag or AUTOPGO_APP environment variable.
+    "app": "example",
+    // The pruning rules applied when profiles for the application are merged
+    "rules": [
+      {
+        // Remove all nodes below the node matching the "drop" regular expression.
+        "drop": "github.com\/example\/.*",
+        // Optionally, keep any nodes that would otherwise be dropped matching the "keep" regular expression.
+        "keep": "github.com\/example\/example-dependency"
+      }
+    ]
+  }
+]
+```
+
+It is recommended to take a backup of your profile using the [download](#download) command prior to applying a new
+pruning rule for the first time.
+
+For specific details on how pruning works, see
+the [implementation documentation](https://pkg.go.dev/github.com/google/pprof/profile#Profile.Prune).
 
 ## Events
 

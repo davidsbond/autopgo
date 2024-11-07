@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	//go:embed testdata/gobench.cpu
+	//go:embed testdata/default.pgo
 	validProfile []byte
 )
 

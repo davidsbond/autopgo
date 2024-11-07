@@ -1,0 +1,13 @@
+[
+  {
+    "app": "autopgo",
+    "rules": [
+      {
+        "drop": "github.com\/aws\/aws-sdk-go.*"
+      },
+      {
+        "drop": "gocloud.dev.*"
+      }
+    ]
+  }
+]

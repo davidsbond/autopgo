@@ -3,6 +3,7 @@ package profile_test
 import (
 	"bytes"
 	"context"
+	"regexp"
 	"testing"
 	"time"
 
@@ -24,9 +25,10 @@ func TestWorker_HandleEvent(t *testing.T) {
 		Event        event.Envelope
 		ExpectsError bool
 		Setup        func(blobs *mocks.MockBlobRepository, events *mocks.MockEventWriter)
+		Pruning      []profile.PruneConfig
 	}{
 		{
-			Name: "handle profile.uploaded with base profile",
+			Name: "handle profile.uploaded with base profile, no pruning",
 			Event: event.Envelope{
 				ID:        uuid.NewString(),
 				Timestamp: time.Now(),
@@ -59,7 +61,7 @@ func TestWorker_HandleEvent(t *testing.T) {
 			},
 		},
 		{
-			Name: "handle profile.uploaded with no base profile",
+			Name: "handle profile.uploaded with no base profile, no pruning",
 			Event: event.Envelope{
 				ID:        uuid.NewString(),
 				Timestamp: time.Now(),
@@ -109,6 +111,49 @@ func TestWorker_HandleEvent(t *testing.T) {
 					Return(nil)
 			},
 		},
+		{
+			Name: "handle profile.uploaded with base profile, with pruning",
+			Event: event.Envelope{
+				ID:        uuid.NewString(),
+				Timestamp: time.Now(),
+				Type:      profile.EventTypeUploaded,
+				Payload: mustMarshal(t, profile.UploadedEvent{
+					App:        "test-app",
+					ProfileKey: "test-app/staging/12345",
+				}),
+			},
+			Pruning: []profile.PruneConfig{
+				{
+					App: "test-app",
+					Rules: []profile.PruneRule{
+						{
+							Drop: regexp.MustCompile(`github\.com/aws/aws-sdk-go.*`),
+						},
+					},
+				},
+			},
+			Setup: func(blobs *mocks.MockBlobRepository, events *mocks.MockEventWriter) {
+				blobs.EXPECT().
+					NewReader(mock.Anything, "test-app/staging/12345").
+					Return(&ReadCloser{data: bytes.NewBuffer(validProfile)}, nil)
+
+				blobs.EXPECT().
+					NewReader(mock.Anything, "test-app/default.pgo").
+					Return(&ReadCloser{data: bytes.NewBuffer(validProfile)}, nil)
+
+				blobs.EXPECT().
+					NewWriter(mock.Anything, "test-app/default.pgo").
+					Return(&WriteCloser{}, nil)
+
+				events.EXPECT().
+					Write(mock.Anything, profile.MergedEvent{
+						App:        "test-app",
+						ProfileKey: "test-app/staging/12345",
+						MergedKey:  "test-app/default.pgo",
+					}).
+					Return(nil)
+			},
+		},
 	}
 
 	for _, tc := range tt {
@@ -120,7 +165,7 @@ func TestWorker_HandleEvent(t *testing.T) {
 				tc.Setup(blobs, events)
 			}
 
-			err := profile.NewWorker(blobs, events).HandleEvent(context.Background(), tc.Event)
+			err := profile.NewWorker(blobs, events, tc.Pruning).HandleEvent(context.Background(), tc.Event)
 			if tc.ExpectsError {
 				require.Error(t, err)
 			}

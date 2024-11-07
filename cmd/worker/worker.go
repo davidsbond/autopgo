@@ -19,6 +19,7 @@ func Command() *cobra.Command {
 		eventReaderURL string
 		eventWriterURL string
 		blobStoreURL   string
+		prune          string
 		port           int
 	)
 
@@ -26,11 +27,15 @@ func Command() *cobra.Command {
 		Use:     "worker",
 		Short:   "Run the autopgo worker",
 		GroupID: "component",
-		Long: "Starts the autopgo worker, a service responsible for handling inbound events for newly uploaded profiles " +
+		Long: "Starts the autopgo worker, a service responsible for handling inbound events for newly uploaded profiles\n" +
 			"and merging them with existing profiles.\n\n" +
-			"The URL based flags follow the semantics based on the individual provider. Supported provides include AWS, " +
-			"GCP & Azure. See the gocloud.dev documentation for further information on configuring these flags for your " +
+			"The --prune flag can be optionally provided to parse a JSON-encoded configuration file that describes how\n" +
+			"profiles should be pruned as they are merged. See the documentation for more information on configuring\n" +
+			"pruning.\n\n" +
+			"The URL based flags follow the semantics based on the individual provider. Supported provides include AWS,\n" +
+			"GCP & Azure. See the gocloud.dev documentation for further information on configuring these flags for your\n" +
 			"specific provider.",
+		Example: "autopgo worker",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
@@ -52,7 +57,15 @@ func Command() *cobra.Command {
 			}
 			defer closers.Close(ctx, blobs)
 
-			worker := profile.NewWorker(blobs, writer)
+			pruning, err := profile.LoadPruneConfig(ctx, prune)
+			switch {
+			case err != nil:
+				return err
+			case len(pruning) == 0:
+				logger.FromContext(ctx).Warn("worker starting with no prune rules")
+			}
+
+			worker := profile.NewWorker(blobs, writer, pruning)
 
 			types := []string{
 				profile.EventTypeMerged,
@@ -81,6 +94,7 @@ func Command() *cobra.Command {
 	flags.StringVar(&eventWriterURL, "event-writer-url", "", "The URL to use for writing to the event bus")
 	flags.StringVar(&blobStoreURL, "blob-store-url", "", "The URL to use for connecting to blob storage")
 	flags.IntVarP(&port, "port", "p", 8081, "Port to use for HTTP traffic")
+	flags.StringVar(&prune, "prune", "", "Location of the configuration file for profile pruning")
 
 	cmd.MarkPersistentFlagRequired("blob-store-url")
 	cmd.MarkPersistentFlagRequired("event-reader-url")
