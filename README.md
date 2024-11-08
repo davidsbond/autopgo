@@ -223,6 +223,17 @@ Event that indicates an uploaded profile has been merged with the base profile a
 }
 ```
 
+#### profile.deleted
+
+Event that indicates the merged and any pending profiles have been deleted for an application.
+
+```json5
+{
+  // The name of the application that has been deleted.
+  "app": "example-app"
+}
+```
+
 ### URL Configuration
 
 The [server](#server) and [worker](#worker) components both utilise URLs for configuring access to both blob storage and

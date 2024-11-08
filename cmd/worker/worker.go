@@ -70,6 +70,7 @@ func Command() *cobra.Command {
 			types := []string{
 				profile.EventTypeMerged,
 				profile.EventTypeUploaded,
+				profile.EventTypeDeleted,
 			}
 
 			group, ctx := errgroup.WithContext(ctx)

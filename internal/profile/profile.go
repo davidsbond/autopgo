@@ -68,12 +68,19 @@ type (
 		// The location of the base profile that has been merged.
 		MergedKey string `json:"mergedKey"`
 	}
+
+	// The DeletedEvent type is an event.Payload implementation describing a profile that has been deleted.
+	DeletedEvent struct {
+		// The application profile that has been deleted.
+		App string `json:"app"`
+	}
 )
 
 // Constants for event types.
 const (
 	EventTypeUploaded = "profile.uploaded"
 	EventTypeMerged   = "profile.merged"
+	EventTypeDeleted  = "profile.deleted"
 )
 
 // Type returns EventTypeUploaded.
@@ -93,6 +100,16 @@ func (e MergedEvent) Type() string {
 
 // Key returns the application name.
 func (e MergedEvent) Key() string {
+	return e.App
+}
+
+// Type returns EventTypeDeleted.
+func (e DeletedEvent) Type() string {
+	return EventTypeDeleted
+}
+
+// Key returns the application name.
+func (e DeletedEvent) Key() string {
 	return e.App
 }
 
