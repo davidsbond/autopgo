@@ -191,20 +191,9 @@ func (h *HTTPController) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for object, err := range h.blobs.List(ctx, IsApplication(app)) {
-		if err != nil {
-			api.ErrorResponse(ctx, w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		err = h.blobs.Delete(ctx, object.Key)
-		switch {
-		case errors.Is(err, blob.ErrNotExist):
-			continue
-		case err != nil:
-			api.ErrorResponse(ctx, w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	if err = h.events.Write(ctx, DeletedEvent{App: app}); err != nil {
+		api.ErrorResponse(ctx, w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	api.Respond(ctx, w, http.StatusOK, DeleteResponse{})

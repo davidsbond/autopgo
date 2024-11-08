@@ -288,29 +288,19 @@ func TestHTTPController_Delete(t *testing.T) {
 		App            string
 		ExpectedStatus int
 		ExpectsError   bool
-		Setup          func(blobs *mocks.MockBlobRepository)
+		Setup          func(blobs *mocks.MockBlobRepository, events *mocks.MockEventWriter)
 	}{
 		{
 			Name:           "success",
 			ExpectedStatus: http.StatusOK,
 			App:            "test",
-			Setup: func(blobs *mocks.MockBlobRepository) {
+			Setup: func(blobs *mocks.MockBlobRepository, events *mocks.MockEventWriter) {
 				blobs.EXPECT().
 					Exists(mock.Anything, "test/default.pgo").
 					Return(true, nil)
 
-				blobs.EXPECT().
-					List(mock.Anything, mock.Anything).
-					Return(func(yield func(blob.Object, error) bool) {
-						yield(blob.Object{
-							Key:          "test/default.pgo",
-							Size:         1000,
-							LastModified: time.Now(),
-						}, nil)
-					})
-
-				blobs.EXPECT().
-					Delete(mock.Anything, "test/default.pgo").
+				events.EXPECT().
+					Write(mock.Anything, deletedEventMatcher("test")).
 					Return(nil)
 			},
 		},
@@ -325,7 +315,7 @@ func TestHTTPController_Delete(t *testing.T) {
 			App:            "test",
 			ExpectedStatus: http.StatusNotFound,
 			ExpectsError:   true,
-			Setup: func(blobs *mocks.MockBlobRepository) {
+			Setup: func(blobs *mocks.MockBlobRepository, events *mocks.MockEventWriter) {
 				blobs.EXPECT().
 					Exists(mock.Anything, "test/default.pgo").
 					Return(false, nil)
@@ -336,15 +326,16 @@ func TestHTTPController_Delete(t *testing.T) {
 	for _, tc := range tt {
 		t.Run(tc.Name, func(t *testing.T) {
 			blobs := mocks.NewMockBlobRepository(t)
+			events := mocks.NewMockEventWriter(t)
 			if tc.Setup != nil {
-				tc.Setup(blobs)
+				tc.Setup(blobs, events)
 			}
 
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest(http.MethodGet, "/", nil)
 			r.SetPathValue("app", tc.App)
 
-			profile.NewHTTPController(blobs, nil).Delete(w, r)
+			profile.NewHTTPController(blobs, events).Delete(w, r)
 
 			assert.Equal(t, tc.ExpectedStatus, w.Code)
 			decoder := json.NewDecoder(w.Body)

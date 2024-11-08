@@ -30,6 +30,12 @@ func uploadedEventMatcher(app string) any {
 	})
 }
 
+func deletedEventMatcher(app string) any {
+	return mock.MatchedBy(func(e profile.DeletedEvent) bool {
+		return e.App == app
+	})
+}
+
 type (
 	WriteCloser struct {
 		closeError error

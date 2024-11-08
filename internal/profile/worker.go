@@ -62,6 +62,8 @@ func (w *Worker) HandleEvent(ctx context.Context, evt event.Envelope) error {
 		return w.handleEventTypeUploaded(ctx, evt)
 	case EventTypeMerged:
 		return w.handleEventTypeMerged(ctx, evt)
+	case EventTypeDeleted:
+		return w.handleEventTypeDeleted(ctx, evt)
 	default:
 		return nil
 	}
@@ -111,10 +113,10 @@ func (w *Worker) handleEventTypeUploaded(ctx context.Context, evt event.Envelope
 			return fmt.Errorf("failed to parse profile at %s: %w", basePath, err)
 		}
 
+		log.DebugContext(ctx, "merging upload with base profile")
 		profiles = append(profiles, baseProfile)
 	}
 
-	log.DebugContext(ctx, "merging upload with base profile")
 	merged, err := profile.Merge(profiles)
 	if err != nil {
 		return fmt.Errorf("failed to merge profiles %s and %s: %w", payload.ProfileKey, basePath, err)
@@ -177,6 +179,29 @@ func (w *Worker) handleEventTypeMerged(ctx context.Context, evt event.Envelope) 
 	default:
 		return nil
 	}
+}
+
+func (w *Worker) handleEventTypeDeleted(ctx context.Context, evt event.Envelope) error {
+	payload, err := event.Unmarshal[DeletedEvent](evt)
+	if err != nil {
+		return fmt.Errorf("invalid payload: %w", err)
+	}
+
+	for object, err := range w.blobs.List(ctx, IsApplication(payload.App)) {
+		if err != nil {
+			return err
+		}
+
+		err = w.blobs.Delete(ctx, object.Key)
+		switch {
+		case errors.Is(err, blob.ErrNotExist):
+			continue
+		case err != nil:
+			return err
+		}
+	}
+
+	return nil
 }
 
 // LoadPruneConfig attempts to parse the file at the specified location and decode it into an array of profile pruning

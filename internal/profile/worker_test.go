@@ -154,6 +154,32 @@ func TestWorker_HandleEvent(t *testing.T) {
 					Return(nil)
 			},
 		},
+		{
+			Name: "handle profile.deleted",
+			Event: event.Envelope{
+				ID:        uuid.NewString(),
+				Timestamp: time.Now(),
+				Type:      profile.EventTypeDeleted,
+				Payload: mustMarshal(t, profile.DeletedEvent{
+					App: "test-app",
+				}),
+			},
+			Setup: func(blobs *mocks.MockBlobRepository, events *mocks.MockEventWriter) {
+				blobs.EXPECT().
+					List(mock.Anything, mock.Anything).
+					Return(func(yield func(blob.Object, error) bool) {
+						yield(blob.Object{
+							Key:          "test-app/default.pgo",
+							Size:         1000,
+							LastModified: time.Now(),
+						}, nil)
+					})
+
+				blobs.EXPECT().
+					Delete(mock.Anything, "test-app/default.pgo").
+					Return(nil)
+			},
+		},
 	}
 
 	for _, tc := range tt {
