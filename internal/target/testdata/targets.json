@@ -1,0 +1,14 @@
+[
+  {
+    "address": "http://localhost:8080",
+    "path": "/debug/pprof/profile"
+  },
+  {
+    "address": "http://localhost:8081",
+    "path": "/debug/pprof/profile"
+  },
+  {
+    "address": "http://localhost:8082",
+    "path": "/debug/pprof/profile"
+  }
+]

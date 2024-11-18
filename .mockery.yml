@@ -10,3 +10,4 @@ packages:
       BlobRepository: {}
       EventWriter: {}
       Client: {}
+      TargetSource: {}

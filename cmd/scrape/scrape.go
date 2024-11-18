@@ -10,6 +10,7 @@ import (
 	"github.com/davidsbond/autopgo/internal/logger"
 	"github.com/davidsbond/autopgo/internal/profile"
 	"github.com/davidsbond/autopgo/internal/server"
+	"github.com/davidsbond/autopgo/internal/target"
 	"github.com/davidsbond/autopgo/pkg/client"
 )
 
@@ -37,7 +38,7 @@ func Command() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
-			targets, err := profile.LoadScrapeConfiguration(ctx, args[0])
+			source, err := target.NewFileSource(ctx, args[0])
 			if err != nil {
 				return err
 			}
@@ -48,12 +49,11 @@ func Command() *cobra.Command {
 				ProfileDuration: duration,
 				ScrapeFrequency: frequency,
 				App:             app,
-				Targets:         targets,
 			})
 
 			group, ctx := errgroup.WithContext(ctx)
 			group.Go(func() error {
-				return scraper.Scrape(ctx)
+				return scraper.Scrape(ctx, source)
 			})
 			group.Go(func() error {
 				return server.Run(ctx, server.Config{
