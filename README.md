@@ -23,32 +23,21 @@ This section outlines the responsibilities of each component and how their confi
 
 The scraper is responsible for performing regular samples of profiles across multiple applications. Typically, it will
 run alongside your applications. Depending on the configuration, it will periodically sample your applications for
-profiles and forward them to the server component. The scraper can handle sampling many different applications
-concurrently, keeping your profiles separated.
+profiles and forward them to the server component. The scraper can handle sampling many different instances of your
+application concurrently.
 
 #### Command
 
 To run the scraper, use the following command:
 
 ```shell
-autopgo scrape config.json
+autopgo scrape
 ```
 
 #### Configuration
 
-The `scrape` command accepts a single argument that is a path to a JSON-encoded configuration file that describes the
-targets available to be scraped. Below is an example configuration:
-
-```json5
-[
-  {
-    // The scheme, host & port combination of the target.
-    "address": "http://localhost:5000",
-    // The path to the pprof profile endpoint, defaults to /debug/pprof/profile.
-    "path": "/debug/pprof/profile"
-  }
-]
-```
+The `scrape` command accepts a single argument that is contextual depending on the mode specified via the `--mode` flag.
+The `mode` flag accepts `file` and `kube` as values, defaulting to `file`.
 
 The `scrape` command also accepts some command-line flags that may also be set via environment variables. They are
 described in the table below:
@@ -62,6 +51,73 @@ described in the table below:
 |     `--app`, `-a`     |     `AUTOPGO_APP`     |          None           | Specifies the the application name that profiles will be uploaded for                    |
 |  `--frequency`, `-f`  |  `AUTOPGO_FREQUENCY`  |          `60s`          | Specifies the interval between profiling runs                                            |
 |  `--duration`, `-d`   |  `AUTOPGO_DURATION`   |          `30s`          | Specifies the amount of time a target will be profiled for                               |
+|    `--mode`, `-m`     |    `AUTOPGO_MODE`     |         `file`          | What mode to run the scraper in (file, kube etc.)                                        |
+
+##### File Mode
+
+When the `mode` flag is set to `file`, the path to a JSON-encoded configuration file is expected as the argument. This
+file should be a JSON array of objects describing where the pprof endpoints are exposed.
+
+```json5
+[
+  {
+    // The scheme, host & port combination of the target.
+    "address": "http://localhost:5000",
+    // The path to the pprof profile endpoint, defaults to /debug/pprof/profile.
+    "path": "/debug/pprof/profile"
+  }
+]
+```
+
+##### Kube Mode
+
+When the `mode` flag is set to `kube`, the first argument becomes an optional path to a kubeconfig file. Scraping
+targets are then queried directly from the Kubernetes API. To run using an "in-cluster" configuration with the
+appropriate RBAC & service account, you can ignore the first argument.
+
+To make your applications discoverable you must set the `autopgo.scrape` and `autopgo.app` labels & the `autopgo.port`
+annotation at the pod level. The table below describes each label/annotation supported by the scraper.
+
+|           Key           |    Type    |                Example                 | Required | Description                                                                             |
+|:-----------------------:|:----------:|:--------------------------------------:|:--------:|:----------------------------------------------------------------------------------------|
+|    `autopgo.scrape`     |   Label    |        `autopgo.scrape: "true"`        |   Yes    | Informs the scraper that this is a scrape target.                                       |
+|  `autopgo.scrape.app`   |   Label    |      `autopgo.app: "hello-world"`      |   Yes    | Informs the scraper which application the profile belongs to.                           |
+|  `autopgo.scrape.port`  | Annotation |         `autopgo.port: "8080"`         |   Yes    | Allows for specifying the port the application serves pprof endpoints on.               |
+|  `autopgo.scrape.path`  | Annotation | `autopgo.path: "/debug/pprof/profile"` |    No    | Allows for specifying the path to the pprof endpoint, defaults to /debug/pprof/profile. |
+| `autopgo.scrape.scheme` | Annotation |        `autopgo.scheme: "http"`        |    No    | Informs the scraper whether the endpoint uses HTTP or HTTPS, defaults to HTTP.          |
+
+It's important to note that in `kube` mode an individual scraper per-application is still required. This is done to keep
+sampling code simple and maximising uptime for profiling your applications individually.
+
+Below is an example of a Kubernetes deployment that appropriately sets all labels & annotations:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-app
+  labels:
+    app: example-app
+spec:
+  selector:
+    matchLabels:
+      app: example-app
+  template:
+    metadata:
+      name: example-app
+      labels:
+        app: example-app
+        autopgo.scrape: "true"
+        autopgo.scrape.app: "example-app"
+      annotations:
+        autopgo.scrape.path: "/debug/pprof/profile"
+        autopgo.scrape.port: "8080"
+        autopgo.scrape.scheme: "http"
+    spec:
+      containers:
+        - name: example-app
+          image: my-image
+```
 
 #### Sampling
 
