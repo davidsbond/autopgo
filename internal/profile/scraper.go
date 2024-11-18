@@ -2,20 +2,15 @@ package profile
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
 	"iter"
 	"log/slog"
 	"math/rand"
 	"net/url"
-	"os"
-	"slices"
 	"sync"
 	"time"
 
-	"github.com/davidsbond/autopgo/internal/closers"
 	"github.com/davidsbond/autopgo/internal/logger"
+	"github.com/davidsbond/autopgo/internal/target"
 )
 
 type (
@@ -30,17 +25,6 @@ type (
 		ScrapeFrequency time.Duration
 		// The application this scraper instance is collecting profiles for.
 		App string
-		// Endpoints that can be called to obtain profiles.
-		Targets []ScrapeTarget
-	}
-
-	// The ScrapeTarget type describes a single pprof endpoint that can be called to obtain a profile.
-	ScrapeTarget struct {
-		// The target address, should include scheme, host & port.
-		Address string `json:"address"`
-		// The path to the pprof profile endpoint, including leading slash. Defaults to /debug/pprof/profile if
-		// unset.
-		Path string `json:"path"`
 	}
 
 	// The Scraper type is used to perform periodic sampling of pprof profiles given a selection of valid
@@ -50,10 +34,15 @@ type (
 		sampleSize      uint
 		scrapeFrequency time.Duration
 		profileDuration time.Duration
-		targets         []ScrapeTarget
 
 		client Client
 		rand   *rand.Rand
+	}
+
+	// The TargetSource interface describes types that can list scraping targets.
+	TargetSource interface {
+		// List should return all targets that are available to be scraped.
+		List(ctx context.Context) ([]target.Target, error)
 	}
 )
 
@@ -61,7 +50,6 @@ type (
 func NewScraper(client Client, config ScrapeConfig) *Scraper {
 	return &Scraper{
 		sampleSize:      config.SampleSize,
-		targets:         config.Targets,
 		profileDuration: config.ProfileDuration,
 		scrapeFrequency: config.ScrapeFrequency,
 		rand:            rand.New(rand.NewSource(time.Now().UnixNano())),
@@ -71,7 +59,7 @@ func NewScraper(client Client, config ScrapeConfig) *Scraper {
 }
 
 // Scrape configured targets. This method blocks until the provided context is cancelled.
-func (s *Scraper) Scrape(ctx context.Context) error {
+func (s *Scraper) Scrape(ctx context.Context, source TargetSource) error {
 	ticker := time.NewTicker(s.scrapeFrequency)
 	defer ticker.Stop()
 
@@ -80,11 +68,15 @@ func (s *Scraper) Scrape(ctx context.Context) error {
 		case <-ctx.Done():
 			return ctx.Err()
 		case <-ticker.C:
-			var group sync.WaitGroup
+			targets, err := source.List(ctx)
+			if err != nil {
+				return err
+			}
 
-			for target := range s.sample(ctx) {
+			var group sync.WaitGroup
+			for t := range s.sample(ctx, targets) {
 				group.Add(1)
-				go s.forwardProfile(ctx, &group, target)
+				go s.forwardProfile(ctx, &group, t)
 			}
 
 			group.Wait()
@@ -92,9 +84,8 @@ func (s *Scraper) Scrape(ctx context.Context) error {
 	}
 }
 
-func (s *Scraper) sample(ctx context.Context) iter.Seq[ScrapeTarget] {
+func (s *Scraper) sample(ctx context.Context, targets []target.Target) iter.Seq[target.Target] {
 	size := int(s.sampleSize)
-	targets := slices.Clone(s.targets)
 
 	if size > len(targets) {
 		size = len(targets)
@@ -104,20 +95,20 @@ func (s *Scraper) sample(ctx context.Context) iter.Seq[ScrapeTarget] {
 		targets[i], targets[j] = targets[j], targets[i]
 	})
 
-	return func(yield func(ScrapeTarget) bool) {
-		for _, target := range targets[:size] {
+	return func(yield func(target.Target) bool) {
+		for _, t := range targets[:size] {
 			if ctx.Err() != nil {
 				return
 			}
 
-			if !yield(target) {
+			if !yield(t) {
 				return
 			}
 		}
 	}
 }
 
-func (s *Scraper) forwardProfile(ctx context.Context, group *sync.WaitGroup, target ScrapeTarget) {
+func (s *Scraper) forwardProfile(ctx context.Context, group *sync.WaitGroup, target target.Target) {
 	defer group.Done()
 
 	log := logger.FromContext(ctx).With(
@@ -145,50 +136,4 @@ func (s *Scraper) forwardProfile(ctx context.Context, group *sync.WaitGroup, tar
 	}
 
 	log.DebugContext(ctx, "uploaded profile")
-}
-
-func (cfg ScrapeConfig) Validate() error {
-	if cfg.SampleSize <= 0 {
-		return errors.New("sample size must be greater than 0")
-	}
-	if cfg.ScrapeFrequency <= 0 {
-		return errors.New("scrape frequency must be greater than 0")
-	}
-
-	if cfg.ProfileDuration <= 0 {
-		return errors.New("profile duration must be greater than 0")
-	}
-
-	if !IsValidAppName(cfg.App) {
-		return errors.New("application name is invalid")
-	}
-
-	if len(cfg.Targets) == 0 {
-		return errors.New("at least one target must be set")
-	}
-
-	for i, target := range cfg.Targets {
-		if target.Address == "" {
-			return fmt.Errorf("targets[%d].address must be set", i)
-		}
-	}
-
-	return nil
-}
-
-// LoadScrapeConfiguration attempts to parse the file at the specified location and decode it into an array of targets
-// that can be scraped. The file is expected to be in JSON encoding.
-func LoadScrapeConfiguration(ctx context.Context, location string) ([]ScrapeTarget, error) {
-	f, err := os.Open(location)
-	if err != nil {
-		return nil, err
-	}
-	defer closers.Close(ctx, f)
-
-	var targets []ScrapeTarget
-	if err = json.NewDecoder(f).Decode(&targets); err != nil {
-		return nil, err
-	}
-
-	return targets, nil
 }
