@@ -2,6 +2,7 @@ package target_test
 
 import (
 	"context"
+	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,6 +13,7 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 
 	"github.com/davidsbond/autopgo/internal/target"
+	"github.com/davidsbond/autopgo/internal/testutil"
 )
 
 func TestKubernetesSource_List(t *testing.T) {
@@ -198,5 +200,32 @@ func TestKubernetesSource_List(t *testing.T) {
 			require.NoError(t, err)
 			assert.EqualValues(t, tc.Expected, actual)
 		})
+	}
+}
+
+func TestKubernetesSource_List_Integration(t *testing.T) {
+	if testing.Short() {
+		t.Skip()
+	}
+
+	ctx := context.Background()
+	client := testutil.K3SContainer(t)
+	pod := testutil.KubernetesTarget(t, client)
+
+	source, err := target.NewKubernetesSource(client, "test")
+	require.NoError(t, err)
+
+	result, err := source.List(ctx)
+	require.NoError(t, err)
+
+	if assert.Len(t, result, 1) {
+		actual := result[0]
+		u, err := url.Parse(actual.Address)
+		require.NoError(t, err)
+
+		assert.EqualValues(t, pod.Annotations["autopgo.scrape.path"], actual.Path)
+		assert.EqualValues(t, pod.Annotations["autopgo.scrape.scheme"], u.Scheme)
+		assert.EqualValues(t, pod.Annotations["autopgo.scrape.port"], u.Port())
+		assert.EqualValues(t, pod.Status.PodIP, u.Hostname())
 	}
 }
