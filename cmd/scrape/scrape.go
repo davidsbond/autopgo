@@ -4,6 +4,7 @@ package scrape
 import (
 	"time"
 
+	"github.com/hashicorp/nomad/api"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 	"k8s.io/client-go/kubernetes"
@@ -18,8 +19,9 @@ import (
 )
 
 const (
-	modeFile = "file"
-	modeKube = "kube"
+	modeFile  = "file"
+	modeKube  = "kube"
+	modeNomad = "nomad"
 )
 
 // Command returns a cobra.Command instance used to run the scraper.
@@ -54,6 +56,8 @@ func Command() *cobra.Command {
 			switch mode {
 			case modeFile:
 				source, err = target.NewFileSource(ctx, args[0])
+			case modeNomad:
+				source, err = nomadTargetSource(app)
 			case modeKube:
 				var configLocation string
 				if len(args) != 0 {
@@ -128,4 +132,13 @@ func kubeTargetSource(configLocation, app string) (*target.KubernetesSource, err
 	}
 
 	return target.NewKubernetesSource(cl, app)
+}
+
+func nomadTargetSource(app string) (*target.NomadSource, error) {
+	nomad, err := api.NewClient(api.DefaultConfig())
+	if err != nil {
+		return nil, err
+	}
+
+	return target.NewNomadSource(nomad, app), nil
 }

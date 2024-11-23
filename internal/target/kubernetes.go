@@ -25,22 +25,14 @@ type (
 	}
 )
 
-const (
-	kubeScrapeLabel      = "autopgo.scrape"
-	kubeAppLabel         = "autopgo.scrape.app"
-	kubePortAnnotation   = "autopgo.scrape.port"
-	kubePathAnnotation   = "autopgo.scrape.path"
-	kubeSchemeAnnotation = "autopgo.scrape.scheme"
-)
-
 // NewKubernetesSource returns a new instance of the KubernetesSource type that can list scrapable targets contained
 // within a Kubernetes cluster. The app parameter determines which pods are scraped based on their autopgo.app label.
 func NewKubernetesSource(client kubernetes.Interface, app string) (*KubernetesSource, error) {
 	return &KubernetesSource{
 		client: client,
 		labels: labels.SelectorFromSet(labels.Set{
-			kubeAppLabel:    app,
-			kubeScrapeLabel: "true",
+			appLabel:    app,
+			scrapeLabel: "true",
 		}),
 		fields: fields.SelectorFromSet(fields.Set{
 			// We only want pods that have a running status, so they'll have a pod IP and in theory
@@ -95,13 +87,13 @@ func (ks *KubernetesSource) List(ctx context.Context) ([]Target, error) {
 
 		annotations := pod.GetObjectMeta().GetAnnotations()
 
-		port := annotations[kubePortAnnotation]
+		port := annotations[portLabel]
 		if port == "" {
 			log.WarnContext(ctx, "ignoring pod with empty port annotation")
 			continue
 		}
 
-		scheme := annotations[kubeSchemeAnnotation]
+		scheme := annotations[schemeLabel]
 		if scheme == "" {
 			scheme = "http"
 		}
@@ -113,7 +105,7 @@ func (ks *KubernetesSource) List(ctx context.Context) ([]Target, error) {
 
 		targets = append(targets, Target{
 			Address: u.String(),
-			Path:    annotations[kubePathAnnotation],
+			Path:    annotations[pathLabel],
 		})
 	}
 
