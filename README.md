@@ -69,6 +69,8 @@ file should be a JSON array of objects describing where the pprof endpoints are 
 ]
 ```
 
+When using `file` mode, the file can be updated without restarting the scraper using a `SIGHUP` signal.
+
 ##### Kube Mode
 
 When the `mode` flag is set to `kube`, the first argument becomes an optional path to a kubeconfig file. Scraping
