@@ -73,8 +73,6 @@ func TestFileSource_List(t *testing.T) {
 }
 
 func TestFileSource_SIGHUP(t *testing.T) {
-	t.Parallel()
-
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(cancel)
 
