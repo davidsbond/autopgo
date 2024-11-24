@@ -11,3 +11,11 @@ type (
 		Path string `json:"path"`
 	}
 )
+
+const (
+	scrapeLabel = "autopgo.scrape"
+	appLabel    = "autopgo.scrape.app"
+	portLabel   = "autopgo.scrape.port"
+	pathLabel   = "autopgo.scrape.path"
+	schemeLabel = "autopgo.scrape.scheme"
+)
