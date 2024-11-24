@@ -103,7 +103,7 @@ func Command() *cobra.Command {
 	flags.UintVarP(&sampleSize, "sample-size", "s", 0, "The maximum number of targets to scrape concurrently")
 	flags.DurationVarP(&duration, "duration", "d", time.Second*30, "How long to profile targets for")
 	flags.DurationVarP(&frequency, "frequency", "f", time.Minute, "Interval between scraping targets")
-	flags.StringVarP(&mode, "mode", "m", modeFile, "Mode to use for obtaining targets (file, kube)")
+	flags.StringVarP(&mode, "mode", "m", modeFile, "Mode to use for obtaining targets (file, kube, nomad)")
 
 	cmd.MarkFlagRequired("app")
 	cmd.MarkFlagRequired("sample-size")
