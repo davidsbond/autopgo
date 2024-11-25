@@ -11,6 +11,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+
+	"github.com/davidsbond/autopgo/internal/target"
 )
 
 func K3SContainer(t *testing.T) kubernetes.Interface {
@@ -41,7 +43,7 @@ func K3SContainer(t *testing.T) kubernetes.Interface {
 	return client
 }
 
-func KubernetesTarget(t *testing.T, client kubernetes.Interface) *corev1.Pod {
+func KubernetesTarget(t *testing.T, client kubernetes.Interface) target.Target {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	t.Cleanup(cancel)
 
@@ -88,5 +90,8 @@ func KubernetesTarget(t *testing.T, client kubernetes.Interface) *corev1.Pod {
 		return pod.Status.Phase == corev1.PodRunning
 	}, time.Minute, time.Second)
 
-	return pod
+	return target.Target{
+		Address: "https://" + pod.Status.PodIP + ":8080",
+		Path:    "/test/path",
+	}
 }

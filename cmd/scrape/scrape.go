@@ -4,7 +4,8 @@ package scrape
 import (
 	"time"
 
-	"github.com/hashicorp/nomad/api"
+	consul "github.com/hashicorp/consul/api"
+	nomad "github.com/hashicorp/nomad/api"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 	"k8s.io/client-go/kubernetes"
@@ -19,9 +20,10 @@ import (
 )
 
 const (
-	modeFile  = "file"
-	modeKube  = "kube"
-	modeNomad = "nomad"
+	modeFile   = "file"
+	modeKube   = "kube"
+	modeNomad  = "nomad"
+	modeConsul = "consul"
 )
 
 // Command returns a cobra.Command instance used to run the scraper.
@@ -58,6 +60,8 @@ func Command() *cobra.Command {
 				source, err = target.NewFileSource(ctx, args[0])
 			case modeNomad:
 				source, err = nomadTargetSource(app)
+			case modeConsul:
+				source, err = consulTargetSource(app)
 			case modeKube:
 				var configLocation string
 				if len(args) != 0 {
@@ -103,7 +107,7 @@ func Command() *cobra.Command {
 	flags.UintVarP(&sampleSize, "sample-size", "s", 0, "The maximum number of targets to scrape concurrently")
 	flags.DurationVarP(&duration, "duration", "d", time.Second*30, "How long to profile targets for")
 	flags.DurationVarP(&frequency, "frequency", "f", time.Minute, "Interval between scraping targets")
-	flags.StringVarP(&mode, "mode", "m", modeFile, "Mode to use for obtaining targets (file, kube, nomad)")
+	flags.StringVarP(&mode, "mode", "m", modeFile, "Mode to use for obtaining targets (file, kube, nomad, consul)")
 
 	cmd.MarkFlagRequired("app")
 	cmd.MarkFlagRequired("sample-size")
@@ -135,10 +139,19 @@ func kubeTargetSource(configLocation, app string) (*target.KubernetesSource, err
 }
 
 func nomadTargetSource(app string) (*target.NomadSource, error) {
-	nomad, err := api.NewClient(api.DefaultConfig())
+	cl, err := nomad.NewClient(nomad.DefaultConfig())
 	if err != nil {
 		return nil, err
 	}
 
-	return target.NewNomadSource(nomad, app), nil
+	return target.NewNomadSource(cl, app), nil
+}
+
+func consulTargetSource(app string) (*target.ConsulSource, error) {
+	cl, err := consul.NewClient(consul.DefaultConfig())
+	if err != nil {
+		return nil, err
+	}
+
+	return target.NewConsulSource(cl, app), nil
 }

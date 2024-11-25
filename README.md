@@ -37,7 +37,7 @@ autopgo scrape
 #### Configuration
 
 The `scrape` command accepts a single argument that is contextual depending on the mode specified via the `--mode` flag.
-The `mode` flag accepts `file`, `kube` & `nomad` as values, defaulting to `file`.
+The `mode` flag accepts `file`, `kube`, `consul` & `nomad` as values, defaulting to `file`.
 
 The `scrape` command also accepts some command-line flags that may also be set via environment variables. They are
 described in the table below:
@@ -51,7 +51,7 @@ described in the table below:
 |     `--app`, `-a`     |     `AUTOPGO_APP`     |          None           | Specifies the the application name that profiles will be uploaded for                    |
 |  `--frequency`, `-f`  |  `AUTOPGO_FREQUENCY`  |          `60s`          | Specifies the interval between profiling runs                                            |
 |  `--duration`, `-d`   |  `AUTOPGO_DURATION`   |          `30s`          | Specifies the amount of time a target will be profiled for                               |
-|    `--mode`, `-m`     |    `AUTOPGO_MODE`     |         `file`          | What mode to run the scraper in (file, kube, nomad)                                      |
+|    `--mode`, `-m`     |    `AUTOPGO_MODE`     |         `file`          | What mode to run the scraper in (file, kube, nomad, consul)                              |
 
 ##### File Mode
 
@@ -142,7 +142,7 @@ As in all other operating modes, a single scraper instance is required per appli
 example of a Nomad job specification that contains a service with all usable tags:
 
 ```hcl
-job "example-app   {
+job "example-app    {
   type = "service"
   group "example-app" {
     count = 1
@@ -173,6 +173,26 @@ job "example-app   {
   }
 }
 ```
+
+##### Consul Mode
+
+When running the scraper in `consul` mode the first argument usually reserved for a configuration file is no longer
+required. If running the scraper against the Consul service catalogue you instead need to set the typical environment
+variables for any consul client, such as `CONSUL_ADDR` etc. One key difference between this mode and
+[kube mode](#kube-mode) is that the `autopgo.port` tag is not required as it can be obtained from the service itself.
+
+The scraper will then source targets from the Consul service catalogue, searching for any services with appropriate tags
+added to their entry. The table below describes these tags and provides examples:
+
+|           Key           |                Example                 | Required | Description                                                                             |
+|:-----------------------:|:--------------------------------------:|:--------:|:----------------------------------------------------------------------------------------|
+|    `autopgo.scrape`     |        `autopgo.scrape: "true"`        |   Yes    | Informs the scraper that this is a scrape target.                                       |
+|  `autopgo.scrape.app`   |      `autopgo.app: "hello-world"`      |   Yes    | Informs the scraper which application the profile belongs to.                           |
+|  `autopgo.scrape.path`  | `autopgo.path: "/debug/pprof/profile"` |    No    | Allows for specifying the path to the pprof endpoint, defaults to /debug/pprof/profile. |
+| `autopgo.scrape.scheme` |        `autopgo.scheme: "http"`        |    No    | Informs the scraper whether the endpoint uses HTTP or HTTPS, defaults to HTTP.          |
+
+As in all other operating modes, a single scraper instance is required per application you wish to scrape. Below is an
+example of a Nomad job specification that contains a service with all usable tags:
 
 #### Sampling
 
