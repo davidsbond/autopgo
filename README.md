@@ -191,8 +191,7 @@ added to their entry. The table below describes these tags and provides examples
 |  `autopgo.scrape.path`  | `autopgo.path: "/debug/pprof/profile"` |    No    | Allows for specifying the path to the pprof endpoint, defaults to /debug/pprof/profile. |
 | `autopgo.scrape.scheme` |        `autopgo.scheme: "http"`        |    No    | Informs the scraper whether the endpoint uses HTTP or HTTPS, defaults to HTTP.          |
 
-As in all other operating modes, a single scraper instance is required per application you wish to scrape. Below is an
-example of a Nomad job specification that contains a service with all usable tags:
+As in all other operating modes, a single scraper instance is required per application you wish to scrape.
 
 #### Sampling
 
