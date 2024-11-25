@@ -25,6 +25,7 @@ dockers:
       - "ghcr.io/davidsbond/autopgo:{{ .Tag }}-amd64"
     extra_files:
       - README.md
+      - LICENSE
     dockerfile: Dockerfile
     use: buildx
     build_flag_templates:
@@ -38,6 +39,7 @@ dockers:
       - "ghcr.io/davidsbond/autopgo:{{ .Tag }}-arm64"
     extra_files:
       - README.md
+      - LICENSE
     dockerfile: Dockerfile
     use: buildx
     build_flag_templates:
@@ -55,6 +57,7 @@ archives:
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     files:
       - README.md
+      - LICENSE
 
 checksum:
   name_template: "{{ .ProjectName }}_{{ .Version }}_SHA256SUMS"
