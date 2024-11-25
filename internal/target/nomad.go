@@ -7,7 +7,6 @@ import (
 	"net"
 	"net/url"
 	"strconv"
-	"strings"
 
 	"github.com/hashicorp/nomad/api"
 
@@ -73,7 +72,7 @@ func (ns *NomadSource) List(ctx context.Context) ([]Target, error) {
 			}
 
 			for _, service := range services {
-				tags := nomadTagsToMap(service.Tags)
+				tags := tagsToMap(service.Tags)
 
 				scheme := tags[schemeLabel]
 				if scheme == "" {
@@ -94,22 +93,4 @@ func (ns *NomadSource) List(ctx context.Context) ([]Target, error) {
 	}
 
 	return targets, nil
-}
-
-func nomadTagsToMap(tags []string) map[string]string {
-	out := make(map[string]string)
-	for _, tag := range tags {
-		if !strings.HasPrefix(tag, "autopgo") {
-			continue
-		}
-
-		parts := strings.SplitN(tag, "=", 2)
-		if len(parts) != 2 {
-			continue
-		}
-
-		out[parts[0]] = parts[1]
-	}
-
-	return out
 }
