@@ -131,12 +131,12 @@ the `autopgo.port` tag is not required as it can be obtained from the service it
 The scraper will then source targets from Nomad's services API, searching for any services with appropriate tags added
 to their specification. The table below describes these tags and provides examples:
 
-|           Key           |                Example                 | Required | Description                                                                             |
-|:-----------------------:|:--------------------------------------:|:--------:|:----------------------------------------------------------------------------------------|
-|    `autopgo.scrape`     |        `autopgo.scrape: "true"`        |   Yes    | Informs the scraper that this is a scrape target.                                       |
-|  `autopgo.scrape.app`   |      `autopgo.app: "hello-world"`      |   Yes    | Informs the scraper which application the profile belongs to.                           |
-|  `autopgo.scrape.path`  | `autopgo.path: "/debug/pprof/profile"` |    No    | Allows for specifying the path to the pprof endpoint, defaults to /debug/pprof/profile. |
-| `autopgo.scrape.scheme` |        `autopgo.scheme: "http"`        |    No    | Informs the scraper whether the endpoint uses HTTP or HTTPS, defaults to HTTP.          |
+|           Tag           |               Example               | Required | Description                                                                             |
+|:-----------------------:|:-----------------------------------:|:--------:|:----------------------------------------------------------------------------------------|
+|    `autopgo.scrape`     |        `autopgo.scrape=true`        |   Yes    | Informs the scraper that this is a scrape target.                                       |
+|  `autopgo.scrape.app`   |      `autopgo.app=hello-world`      |   Yes    | Informs the scraper which application the profile belongs to.                           |
+|  `autopgo.scrape.path`  | `autopgo.path=/debug/pprof/profile` |    No    | Allows for specifying the path to the pprof endpoint, defaults to /debug/pprof/profile. |
+| `autopgo.scrape.scheme` |        `autopgo.scheme=http`        |    No    | Informs the scraper whether the endpoint uses HTTP or HTTPS, defaults to HTTP.          |
 
 As in all other operating modes, a single scraper instance is required per application you wish to scrape. Below is an
 example of a Nomad job specification that contains a service with all usable tags:
@@ -184,12 +184,12 @@ variables for any consul client, such as `CONSUL_ADDR` etc. One key difference b
 The scraper will then source targets from the Consul service catalogue, searching for any services with appropriate tags
 added to their entry. The table below describes these tags and provides examples:
 
-|           Key           |                Example                 | Required | Description                                                                             |
-|:-----------------------:|:--------------------------------------:|:--------:|:----------------------------------------------------------------------------------------|
-|    `autopgo.scrape`     |        `autopgo.scrape: "true"`        |   Yes    | Informs the scraper that this is a scrape target.                                       |
-|  `autopgo.scrape.app`   |      `autopgo.app: "hello-world"`      |   Yes    | Informs the scraper which application the profile belongs to.                           |
-|  `autopgo.scrape.path`  | `autopgo.path: "/debug/pprof/profile"` |    No    | Allows for specifying the path to the pprof endpoint, defaults to /debug/pprof/profile. |
-| `autopgo.scrape.scheme` |        `autopgo.scheme: "http"`        |    No    | Informs the scraper whether the endpoint uses HTTP or HTTPS, defaults to HTTP.          |
+|           Tag           |               Example               | Required | Description                                                                             |
+|:-----------------------:|:-----------------------------------:|:--------:|:----------------------------------------------------------------------------------------|
+|    `autopgo.scrape`     |        `autopgo.scrape=true`        |   Yes    | Informs the scraper that this is a scrape target.                                       |
+|  `autopgo.scrape.app`   |      `autopgo.app=hello-world`      |   Yes    | Informs the scraper which application the profile belongs to.                           |
+|  `autopgo.scrape.path`  | `autopgo.path=/debug/pprof/profile` |    No    | Allows for specifying the path to the pprof endpoint, defaults to /debug/pprof/profile. |
+| `autopgo.scrape.scheme` |        `autopgo.scheme=http`        |    No    | Informs the scraper whether the endpoint uses HTTP or HTTPS, defaults to HTTP.          |
 
 As in all other operating modes, a single scraper instance is required per application you wish to scrape.
 
