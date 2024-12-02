@@ -36,6 +36,7 @@ func Command() *cobra.Command {
 		frequency  time.Duration
 		app        string
 		mode       string
+		debug      bool
 	)
 
 	cmd := &cobra.Command{
@@ -89,7 +90,8 @@ func Command() *cobra.Command {
 			})
 			group.Go(func() error {
 				return server.Run(ctx, server.Config{
-					Port: port,
+					Debug: debug,
+					Port:  port,
 					Middleware: []server.Middleware{
 						logger.Middleware(logger.FromContext(ctx)),
 					},
@@ -108,6 +110,7 @@ func Command() *cobra.Command {
 	flags.DurationVarP(&duration, "duration", "d", time.Second*30, "How long to profile targets for")
 	flags.DurationVarP(&frequency, "frequency", "f", time.Minute, "Interval between scraping targets")
 	flags.StringVarP(&mode, "mode", "m", modeFile, "Mode to use for obtaining targets (file, kube, nomad, consul)")
+	flags.BoolVar(&debug, "debug", false, "Enable debug endpoints")
 
 	cmd.MarkFlagRequired("app")
 	cmd.MarkFlagRequired("sample-size")

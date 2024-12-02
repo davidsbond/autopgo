@@ -18,6 +18,7 @@ func Command() *cobra.Command {
 		port           int
 		eventWriterURL string
 		blobStoreURL   string
+		debug          bool
 	)
 
 	cmd := &cobra.Command{
@@ -44,7 +45,8 @@ func Command() *cobra.Command {
 			defer closers.Close(ctx, blobs)
 
 			return server.Run(ctx, server.Config{
-				Port: port,
+				Debug: debug,
+				Port:  port,
 				Controllers: []server.Controller{
 					profile.NewHTTPController(blobs, writer),
 				},
@@ -59,6 +61,7 @@ func Command() *cobra.Command {
 	flags.IntVarP(&port, "port", "p", 8080, "Port to use for HTTP traffic")
 	flags.StringVar(&eventWriterURL, "event-writer-url", "", "The URL to use for writing to the event bus")
 	flags.StringVar(&blobStoreURL, "blob-store-url", "", "The URL to use for connecting to blob storage")
+	flags.BoolVar(&debug, "debug", false, "Enable debug endpoints")
 
 	cmd.MarkPersistentFlagRequired("blob-store-url")
 	cmd.MarkPersistentFlagRequired("event-writer-url")
