@@ -80,3 +80,19 @@ func (cs *ConsulSource) List(ctx context.Context) ([]Target, error) {
 
 	return targets, nil
 }
+
+// Name returns "consul". This method is used to implement the operation.Check interface for use in health checks.
+func (cs *ConsulSource) Name() string {
+	return "consul"
+}
+
+// Check attempts to list services within consul. This method is used to implement the operation.Check interface for use
+// in health checks.
+func (cs *ConsulSource) Check(ctx context.Context) error {
+	options := &api.QueryOptions{
+		Filter: cs.filter,
+	}
+
+	_, _, err := cs.client.Catalog().Services(options.WithContext(ctx))
+	return err
+}

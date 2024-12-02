@@ -111,3 +111,20 @@ func (ks *KubernetesSource) List(ctx context.Context) ([]Target, error) {
 
 	return targets, ctx.Err()
 }
+
+// Name returns "kubernetes". This method is used to implement the operation.Check interface for use in health checks.
+func (ks *KubernetesSource) Name() string {
+	return "kubernetes"
+}
+
+// Check attempts to list pods within kubernetes. This method is used to implement the operation.Checker interface for
+// use in health checks.
+func (ks *KubernetesSource) Check(ctx context.Context) error {
+	options := metav1.ListOptions{
+		LabelSelector: ks.labels.String(),
+		FieldSelector: ks.fields.String(),
+	}
+
+	_, err := ks.client.CoreV1().Pods(corev1.NamespaceAll).List(ctx, options)
+	return err
+}

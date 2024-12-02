@@ -9,6 +9,7 @@ import (
 	"github.com/davidsbond/autopgo/internal/closers"
 	"github.com/davidsbond/autopgo/internal/event"
 	"github.com/davidsbond/autopgo/internal/logger"
+	"github.com/davidsbond/autopgo/internal/operation"
 	"github.com/davidsbond/autopgo/internal/profile"
 	"github.com/davidsbond/autopgo/internal/server"
 )
@@ -82,6 +83,13 @@ func Command() *cobra.Command {
 				return server.Run(ctx, server.Config{
 					Debug: debug,
 					Port:  port,
+					Controllers: []server.Controller{
+						operation.NewHTTPController([]operation.Checker{
+							blobs,
+							reader,
+							writer,
+						}),
+					},
 					Middleware: []server.Middleware{
 						logger.Middleware(logger.FromContext(ctx)),
 					},

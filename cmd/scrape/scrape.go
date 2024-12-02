@@ -13,6 +13,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/davidsbond/autopgo/internal/logger"
+	"github.com/davidsbond/autopgo/internal/operation"
 	"github.com/davidsbond/autopgo/internal/profile"
 	"github.com/davidsbond/autopgo/internal/server"
 	"github.com/davidsbond/autopgo/internal/target"
@@ -53,7 +54,7 @@ func Command() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
-			var source profile.TargetSource
+			var source target.Source
 			var err error
 
 			switch mode {
@@ -92,6 +93,11 @@ func Command() *cobra.Command {
 				return server.Run(ctx, server.Config{
 					Debug: debug,
 					Port:  port,
+					Controllers: []server.Controller{
+						operation.NewHTTPController([]operation.Checker{
+							source,
+						}),
+					},
 					Middleware: []server.Middleware{
 						logger.Middleware(logger.FromContext(ctx)),
 					},

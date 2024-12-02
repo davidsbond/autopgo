@@ -149,3 +149,15 @@ func (b *Bucket) List(ctx context.Context, filter Filter) iter.Seq2[Object, erro
 func (b *Bucket) Exists(ctx context.Context, path string) (bool, error) {
 	return b.blob.Exists(ctx, path)
 }
+
+// Name returns "blob". This method is used to implement the operation.Checker interface for use in health checks.
+func (b *Bucket) Name() string {
+	return "blob"
+}
+
+// Check determines if the bucket is accessible. This method is used to implement the operation.Checker interface for
+// use in health checks.
+func (b *Bucket) Check(ctx context.Context) error {
+	_, err := b.blob.IsAccessible(ctx)
+	return err
+}
