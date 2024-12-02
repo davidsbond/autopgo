@@ -19,7 +19,8 @@ import (
 type (
 	// The Writer type is used to publish messages onto an event bus.
 	Writer struct {
-		events *pubsub.Topic
+		lastError error
+		events    *pubsub.Topic
 	}
 )
 
@@ -63,10 +64,24 @@ func (w *Writer) Write(ctx context.Context, e Payload) error {
 
 	log.DebugContext(ctx, "publishing event")
 
-	return w.events.Send(ctx, &pubsub.Message{
+	err = w.events.Send(ctx, &pubsub.Message{
 		Body:       body,
 		BeforeSend: keyFunc(e.Key()),
 	})
+
+	w.lastError = err
+	return err
+}
+
+// Name returns "event-writer" This method is used to implement the operation.Checker interface for use in health checks.
+func (w *Writer) Name() string {
+	return "event-writer"
+}
+
+// Check returns the last non-nil error when trying to write an event. This method is used to implement the
+// operation.Checker interface for use in health checks.
+func (w *Writer) Check(_ context.Context) error {
+	return w.lastError
 }
 
 func keyFunc(key string) func(asFunc func(interface{}) bool) error {

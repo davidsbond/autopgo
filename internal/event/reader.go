@@ -8,15 +8,16 @@ import (
 	"slices"
 	"time"
 
-	"github.com/davidsbond/autopgo/internal/logger"
-
 	"gocloud.dev/pubsub"
+
+	"github.com/davidsbond/autopgo/internal/logger"
 )
 
 type (
 	// The Reader type is used to consume messages from an event bus.
 	Reader struct {
-		events *pubsub.Subscription
+		events    *pubsub.Subscription
+		lastError error
 	}
 
 	// The Handler type is a function used to handle a single inbound event.
@@ -55,8 +56,11 @@ func (r *Reader) Read(ctx context.Context, types []string, h Handler) error {
 		default:
 			message, err := r.events.Receive(ctx)
 			if err != nil {
+				r.lastError = err
 				return err
 			}
+
+			r.lastError = nil
 
 			var envelope Envelope
 			if err = json.Unmarshal(message.Body, &envelope); err != nil {
@@ -91,4 +95,15 @@ func nack(message *pubsub.Message) {
 	if message.Nackable() {
 		message.Nack()
 	}
+}
+
+// Name returns "event-reader" This method is used to implement the operation.Checker interface for use in health checks.
+func (r *Reader) Name() string {
+	return "event-reader"
+}
+
+// Check returns the last non-nil error when trying to read an event. This method is used to implement the
+// operation.Checker interface for use in health checks.
+func (r *Reader) Check(_ context.Context) error {
+	return r.lastError
 }

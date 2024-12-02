@@ -1,7 +1,12 @@
 // Package target provides types for managing sources of applications that can be scraped.
 package target
 
-import "strings"
+import (
+	"context"
+	"strings"
+
+	"github.com/davidsbond/autopgo/internal/operation"
+)
 
 type (
 	// The Target type describes individual instances of an application that can be scraped.
@@ -11,6 +16,14 @@ type (
 		// The path to the pprof profile endpoint, including leading slash. Defaults to /debug/pprof/profile if
 		// unset.
 		Path string `json:"path"`
+	}
+
+	// The Source interface describes types that can query scrapable targets from some system that stores them.
+	Source interface {
+		operation.Checker
+
+		// List should return all targets that can be scraped.
+		List(ctx context.Context) ([]Target, error)
 	}
 )
 

@@ -92,3 +92,16 @@ func readTargetsFromFile(ctx context.Context, location string) ([]Target, error)
 
 	return targets, nil
 }
+
+// Check performs os.Stat on the desired config file. This method is used to implement the operation.Checker interface
+// for use in health checks.
+func (fs *FileSource) Check(_ context.Context) error {
+	_, err := os.Stat(fs.location)
+	return err
+}
+
+// Name returns "file://<config location>". This method is used to implement the operation.Checker interface for use in
+// health checks.
+func (fs *FileSource) Name() string {
+	return "file://" + fs.location
+}

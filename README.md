@@ -505,3 +505,38 @@ table below:
 |   `--api-url`, `-u`   |   `AUTOPGO_API_URL`   | `http://localhost:8080` | The base URL of the profile server where the specified profile will be sent              |
 | `--older-than`, `-d`  | `AUTOPGO_OLDER_THAN`  |          None           | How long a profile must not have been updated for to be eligible for cleaning            |
 | `--larger-than`, `-s` | `AUTOPGO_LARGER_THAN` |          None           | The minimum size (in bytes) a profile must be to be eligible for cleaning                |
+
+## Operations
+
+This section contains information for use by those running the various autopgo components.
+
+### Health & Readiness
+
+Each component exposes both health and readiness endpoints at the `/api/health` and `/api/ready`
+paths respectively. These can be used by your operator of choice to handle health and readiness checks. The health
+endpoint's response contains specifics on the individual dependencies of that component and its own health. 
+
+Below is an example health check response from the server component:
+
+```json
+{
+  "status": "healthy",
+  "dependencies": [
+    {
+      "name": "blob",
+      "status": "healthy"
+    },
+    {
+      "name": "event-reader",
+      "status": "healthy"
+    },
+    {
+      "name": "event-writer",
+      "status": "healthy"
+    }
+  ]
+}
+```
+
+Health endpoints will return a `503` status code if one or more of the individual components are in an unhealthy state
+and a `message` field will be present with the error message received when checking that dependency's health.

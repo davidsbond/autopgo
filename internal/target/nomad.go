@@ -94,3 +94,20 @@ func (ns *NomadSource) List(ctx context.Context) ([]Target, error) {
 
 	return targets, nil
 }
+
+// Name returns "nomad". This method is used to implement the operation.Checker interface for use in health checks.
+func (ns *NomadSource) Name() string {
+	return "nomad"
+}
+
+// Check attempts to list services in nomad. This method is used to implement the operation.Checker interface for use in
+// health checks.
+func (ns *NomadSource) Check(ctx context.Context) error {
+	listOpts := &api.QueryOptions{
+		Namespace: api.AllNamespacesNamespace,
+		Filter:    ns.filter,
+	}
+
+	_, _, err := ns.client.Services().List(listOpts.WithContext(ctx))
+	return err
+}
