@@ -21,6 +21,7 @@ func Command() *cobra.Command {
 		blobStoreURL   string
 		prune          string
 		port           int
+		debug          bool
 	)
 
 	cmd := &cobra.Command{
@@ -79,7 +80,8 @@ func Command() *cobra.Command {
 			})
 			group.Go(func() error {
 				return server.Run(ctx, server.Config{
-					Port: port,
+					Debug: debug,
+					Port:  port,
 					Middleware: []server.Middleware{
 						logger.Middleware(logger.FromContext(ctx)),
 					},
@@ -96,6 +98,7 @@ func Command() *cobra.Command {
 	flags.StringVar(&blobStoreURL, "blob-store-url", "", "The URL to use for connecting to blob storage")
 	flags.IntVarP(&port, "port", "p", 8081, "Port to use for HTTP traffic")
 	flags.StringVar(&prune, "prune", "", "Location of the configuration file for profile pruning")
+	flags.BoolVar(&debug, "debug", false, "Enable debug endpoints")
 
 	cmd.MarkPersistentFlagRequired("blob-store-url")
 	cmd.MarkPersistentFlagRequired("event-reader-url")

@@ -21,6 +21,8 @@ type (
 		Controllers []Controller
 		// Middleware functions to invoke prior to request handlers.
 		Middleware []Middleware
+		// Enables debug endpoints for pprof.
+		Debug bool
 	}
 
 	// The Controller interface describes types that register HTTP request handlers.
@@ -43,7 +45,9 @@ func Run(ctx context.Context, config Config) error {
 		controller.Register(mux)
 	}
 
-	registerDebug(mux)
+	if config.Debug {
+		registerDebug(mux)
+	}
 
 	server := &http.Server{
 		Handler: mux,
