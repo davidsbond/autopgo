@@ -3,7 +3,7 @@ module github.com/davidsbond/autopgo
 go 1.23
 
 require (
-	cloud.google.com/go/pubsub v1.45.1
+	cloud.google.com/go/pubsub v1.45.2
 	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.7.3
 	github.com/IBM/sarama v1.43.3
 	github.com/aws/aws-sdk-go-v2/service/sns v1.33.7
