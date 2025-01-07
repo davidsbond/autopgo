@@ -5,7 +5,7 @@ go 1.23
 require (
 	cloud.google.com/go/pubsub v1.45.3
 	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.7.3
-	github.com/IBM/sarama v1.43.3
+	github.com/IBM/sarama v1.44.0
 	github.com/aws/aws-sdk-go-v2/service/sns v1.33.8
 	github.com/google/pprof v0.0.0-20241023014458-598669927662
 	github.com/google/uuid v1.6.0
@@ -166,7 +166,7 @@ require (
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
-	github.com/pierrec/lz4/v4 v4.1.21 // indirect
+	github.com/pierrec/lz4/v4 v4.1.22 // indirect
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
