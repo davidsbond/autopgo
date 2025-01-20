@@ -17,7 +17,7 @@ require (
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.10.0
 	github.com/testcontainers/testcontainers-go/modules/consul v0.34.0
-	github.com/testcontainers/testcontainers-go/modules/k3s v0.34.0
+	github.com/testcontainers/testcontainers-go/modules/k3s v0.35.0
 	github.com/testcontainers/testcontainers-go/modules/minio v0.34.0
 	gocloud.dev v0.40.0
 	gocloud.dev/pubsub/kafkapubsub v0.40.0
@@ -184,7 +184,7 @@ require (
 	github.com/spf13/cast v1.6.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	github.com/testcontainers/testcontainers-go v0.34.0 // indirect
+	github.com/testcontainers/testcontainers-go v0.35.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
