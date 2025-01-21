@@ -585,8 +585,8 @@ github.com/testcontainers/testcontainers-go/modules/consul v0.34.0 h1:oIPuWA33Uu
 github.com/testcontainers/testcontainers-go/modules/consul v0.34.0/go.mod h1:cqFzW/3Hy2kwK7ZCFct1qFsRdjOkcWBrTJNyi7BnIaQ=
 github.com/testcontainers/testcontainers-go/modules/k3s v0.35.0 h1:zEfdO1Dz7sA2jNpf1PVCOI6FND1t/mDpaeDCguaLRXw=
 github.com/testcontainers/testcontainers-go/modules/k3s v0.35.0/go.mod h1:YWc+Yph4EvIXHsjRAwPezJEvQGoOFP1AEbfhrYrylAM=
-github.com/testcontainers/testcontainers-go/modules/minio v0.34.0 h1:OpUqT7VV/d+wriDMHcCZCUfOoFE6wiHnGVzJOXqq8lU=
-github.com/testcontainers/testcontainers-go/modules/minio v0.34.0/go.mod h1:0iaOtVNCzu04KcXHgmdNE7aelKaMUwC9x1M0oe6h1sw=
+github.com/testcontainers/testcontainers-go/modules/minio v0.35.0 h1:oJMrfB0hIABClRsJrVJ43zTEsCVk0JTN7RdTz9r+tk4=
+github.com/testcontainers/testcontainers-go/modules/minio v0.35.0/go.mod h1:Q7gSllC2zi78e2OF6Gwn+DXyqbxdbt6PAuaZdIPh3DQ=
 github.com/tklauser/go-sysconf v0.3.12 h1:0QaGUFOdQaIVdPgfITYzaTegZvdCjmYO52cSFAEVmqU=
 github.com/tklauser/go-sysconf v0.3.12/go.mod h1:Ho14jnntGE1fpdOqQEEaiKRpvIavV0hSfmBq8nJbHYI=
 github.com/tklauser/numcpus v0.6.1 h1:ng9scYS7az0Bk4OZLvrNXNSAO2Pxr1XXRAPyjhIx+Fk=
