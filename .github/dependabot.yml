@@ -9,6 +9,9 @@ updates:
       kubernetes:
         patterns:
           - k8s.io/*
+      aws:
+        patterns:
+          - github.com/aws/aws-sdk-go-v2*
   - package-ecosystem: github-actions
     directory: /
     schedule:
