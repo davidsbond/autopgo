@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/pubsub v1.45.3
 	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.8.0
 	github.com/IBM/sarama v1.45.1
-	github.com/aws/aws-sdk-go-v2/service/sns v1.34.0
+	github.com/aws/aws-sdk-go-v2/service/sns v1.34.1
 	github.com/google/pprof v0.0.0-20241023014458-598669927662
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/consul/api v1.31.2
