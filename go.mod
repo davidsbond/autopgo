@@ -1,6 +1,7 @@
 module github.com/davidsbond/autopgo
 
 go 1.23
+toolchain go1.24.1
 
 require (
 	cloud.google.com/go/pubsub v1.45.3
@@ -22,7 +23,7 @@ require (
 	gocloud.dev v0.40.0
 	gocloud.dev/pubsub/kafkapubsub v0.40.0
 	gocloud.dev/pubsub/natspubsub v0.40.0
-	golang.org/x/sync v0.11.0
+	golang.org/x/sync v0.14.0
 	k8s.io/api v0.31.4
 	k8s.io/apimachinery v0.31.4
 	k8s.io/client-go v0.31.3
