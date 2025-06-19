@@ -18,7 +18,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/testcontainers/testcontainers-go/modules/consul v0.35.0
 	github.com/testcontainers/testcontainers-go/modules/k3s v0.37.0
-	github.com/testcontainers/testcontainers-go/modules/minio v0.35.0
+	github.com/testcontainers/testcontainers-go/modules/minio v0.37.0
 	gocloud.dev v0.40.0
 	gocloud.dev/pubsub/kafkapubsub v0.40.0
 	gocloud.dev/pubsub/natspubsub v0.40.0

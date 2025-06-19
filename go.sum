@@ -587,8 +587,8 @@ github.com/testcontainers/testcontainers-go/modules/consul v0.35.0 h1:vS6vT2Ad97
 github.com/testcontainers/testcontainers-go/modules/consul v0.35.0/go.mod h1:m6zJaKqrGg/T+Z4738/TMv4pbCi15ZUnMENv+AnLckg=
 github.com/testcontainers/testcontainers-go/modules/k3s v0.37.0 h1:lqwknybf56hBLi2YsKs01VLSUK8qXnIcG1FM/6/L5qI=
 github.com/testcontainers/testcontainers-go/modules/k3s v0.37.0/go.mod h1:RIsXAxAUiaDNfsGsYcZB1TyDn2mqy52lO0HrGFts8cs=
-github.com/testcontainers/testcontainers-go/modules/minio v0.35.0 h1:oJMrfB0hIABClRsJrVJ43zTEsCVk0JTN7RdTz9r+tk4=
-github.com/testcontainers/testcontainers-go/modules/minio v0.35.0/go.mod h1:Q7gSllC2zi78e2OF6Gwn+DXyqbxdbt6PAuaZdIPh3DQ=
+github.com/testcontainers/testcontainers-go/modules/minio v0.37.0 h1:p2LXViCDHBP0JfVfT9hDxkbTxv+BzAL5ZYOF8sj1q1I=
+github.com/testcontainers/testcontainers-go/modules/minio v0.37.0/go.mod h1:OhJqQ9L2FOnb/otqLbjskhj7utl1Z5RFt2k6mhG9aeI=
 github.com/tinylib/msgp v1.3.0 h1:ULuf7GPooDaIlbyvgAxBV/FI7ynli6LZ1/nVUNu+0ww=
 github.com/tinylib/msgp v1.3.0/go.mod h1:ykjzy2wzgrlvpDCRc4LA8UXy6D8bzMSuAF3WD57Gok0=
 github.com/tklauser/go-sysconf v0.3.12 h1:0QaGUFOdQaIVdPgfITYzaTegZvdCjmYO52cSFAEVmqU=
