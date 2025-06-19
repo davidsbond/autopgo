@@ -583,8 +583,8 @@ github.com/subosito/gotenv v1.6.0 h1:9NlTDc1FTs4qu0DDq7AEtTPNw6SVm7uBMsUCUjABIf8
 github.com/subosito/gotenv v1.6.0/go.mod h1:Dk4QP5c2W3ibzajGcXpNraDfq2IrhjMIvMSWPKKo0FU=
 github.com/testcontainers/testcontainers-go v0.37.0 h1:L2Qc0vkTw2EHWQ08djon0D2uw7Z/PtHS/QzZZ5Ra/hg=
 github.com/testcontainers/testcontainers-go v0.37.0/go.mod h1:QPzbxZhQ6Bclip9igjLFj6z0hs01bU8lrl2dHQmgFGM=
-github.com/testcontainers/testcontainers-go/modules/consul v0.35.0 h1:vS6vT2Ad97//2s5p9W2z9rkoVmbMkiAGJGULzB3JW3U=
-github.com/testcontainers/testcontainers-go/modules/consul v0.35.0/go.mod h1:m6zJaKqrGg/T+Z4738/TMv4pbCi15ZUnMENv+AnLckg=
+github.com/testcontainers/testcontainers-go/modules/consul v0.37.0 h1:RjmPyCU/nwEwprBe7xp/93vi6SCajEthVo5+ytmqvQg=
+github.com/testcontainers/testcontainers-go/modules/consul v0.37.0/go.mod h1:kkNgwsiLAEhKhjFGzrdWA4kSmn484QlAwsuU2iNhqp0=
 github.com/testcontainers/testcontainers-go/modules/k3s v0.37.0 h1:lqwknybf56hBLi2YsKs01VLSUK8qXnIcG1FM/6/L5qI=
 github.com/testcontainers/testcontainers-go/modules/k3s v0.37.0/go.mod h1:RIsXAxAUiaDNfsGsYcZB1TyDn2mqy52lO0HrGFts8cs=
 github.com/testcontainers/testcontainers-go/modules/minio v0.37.0 h1:p2LXViCDHBP0JfVfT9hDxkbTxv+BzAL5ZYOF8sj1q1I=
