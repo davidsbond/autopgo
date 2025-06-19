@@ -5,7 +5,7 @@ go 1.24.0
 require (
 	cloud.google.com/go/pubsub v1.45.3
 	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.9.0
-	github.com/IBM/sarama v1.45.1
+	github.com/IBM/sarama v1.45.2
 	github.com/aws/aws-sdk-go-v2/service/sns v1.34.7
 	github.com/google/pprof v0.0.0-20241029153458-d1b30febd7db
 	github.com/google/uuid v1.6.0
@@ -200,13 +200,13 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.31.0 // indirect
 	go.opentelemetry.io/otel/trace v1.31.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/crypto v0.36.0 // indirect
+	golang.org/x/crypto v0.38.0 // indirect
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect
-	golang.org/x/net v0.38.0 // indirect
+	golang.org/x/net v0.40.0 // indirect
 	golang.org/x/oauth2 v0.27.0 // indirect
-	golang.org/x/sys v0.31.0 // indirect
-	golang.org/x/term v0.30.0 // indirect
-	golang.org/x/text v0.23.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/term v0.32.0 // indirect
+	golang.org/x/text v0.25.0 // indirect
 	golang.org/x/time v0.9.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	google.golang.org/api v0.210.0 // indirect
