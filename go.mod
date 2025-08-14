@@ -17,7 +17,7 @@ require (
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.10.0
 	github.com/testcontainers/testcontainers-go/modules/consul v0.37.0
-	github.com/testcontainers/testcontainers-go/modules/k3s v0.37.0
+	github.com/testcontainers/testcontainers-go/modules/k3s v0.38.0
 	github.com/testcontainers/testcontainers-go/modules/minio v0.38.0
 	gocloud.dev v0.40.0
 	gocloud.dev/pubsub/kafkapubsub v0.40.0
