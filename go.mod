@@ -12,8 +12,8 @@ require (
 	github.com/hashicorp/consul/api v1.32.1
 	github.com/hashicorp/nomad/api v0.0.0-20241121182148-997da25cdb49
 	github.com/minio/minio-go/v7 v7.0.95
-	github.com/spf13/cobra v1.9.1
-	github.com/spf13/pflag v1.0.7
+	github.com/spf13/cobra v1.10.1
+	github.com/spf13/pflag v1.0.9
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.11.0
 	github.com/testcontainers/testcontainers-go/modules/consul v0.38.0
