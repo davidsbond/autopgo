@@ -309,8 +309,8 @@ github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674 h1:JeSE6pjso5T
 github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674/go.mod h1:r4w70xmWCQKmi1ONH4KIaBptdivuRPyosB9RmPlGEwA=
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0 h1:YBftPWNWd4WwGqtY2yeZL2ef8rHAxPBD8KFhJpmcqms=
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0/go.mod h1:YN5jB8ie0yfIUg6VvR9Kz84aCaG7AsGZnLjhHbUqwPg=
-github.com/hashicorp/consul/api v1.32.2 h1:ROr9omQkeeFrSm6X7zZJtWPcLWsHmlgEP0Z17fAhtQA=
-github.com/hashicorp/consul/api v1.32.2/go.mod h1:qCrHmC5A1g3ieZExjdU95p5cYqfah3AiTm7vxsovco0=
+github.com/hashicorp/consul/api v1.32.3 h1:uphjFvDmymhtnqWYinve9GadBPreT8EGS/u2PewIs0c=
+github.com/hashicorp/consul/api v1.32.3/go.mod h1:qCrHmC5A1g3ieZExjdU95p5cYqfah3AiTm7vxsovco0=
 github.com/hashicorp/consul/sdk v0.16.3 h1:kI/oax+yeaoremkh36G/f4Q13ivdFF4AE+Co/LlZa0Q=
 github.com/hashicorp/consul/sdk v0.16.3/go.mod h1:TSPshuYdi1OQwpLund2vkTHpp4WnLyhf7Q/YihGMtp0=
 github.com/hashicorp/cronexpr v1.1.2 h1:wG/ZYIKT+RT3QkOdgYc+xsKWVRgnxJ1OJtjjy84fJ9A=

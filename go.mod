@@ -9,7 +9,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sns v1.38.3
 	github.com/google/pprof v0.0.0-20241029153458-d1b30febd7db
 	github.com/google/uuid v1.6.0
-	github.com/hashicorp/consul/api v1.32.2
+	github.com/hashicorp/consul/api v1.32.3
 	github.com/hashicorp/nomad/api v0.0.0-20241121182148-997da25cdb49
 	github.com/minio/minio-go/v7 v7.0.95
 	github.com/spf13/cobra v1.10.1
